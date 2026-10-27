@@ -1,0 +1,123 @@
+:root {
+  --bg: #fdf8ec;
+  --ink: #14201d;
+  --teal: #0d4f45;
+  --teal-ink: #ffffff;
+  --focus: #b45309;
+  --error: #8a1c1c;
+  --line: #c9c2b0;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 1rem;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+main { max-width: 34rem; margin: 0 auto; }
+
+h1 { font-size: 1.5rem; margin-block: 0 0.25rem; }
+h2 { font-size: 1rem; margin-block: 0 0.5rem; }
+.subtitle { margin-block: 0 1rem; }
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+button, input, textarea, select, a[href] {
+  min-height: 44px;
+  min-width: 44px;
+  font: inherit;
+}
+
+label {
+  display: block;
+  margin-block: 0.9rem 0.3rem;
+  font-weight: 600;
+}
+
+input, textarea {
+  width: 100%;
+  padding: 0.5rem;
+  border: 2px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--ink);
+}
+
+input[aria-invalid="true"], textarea[aria-invalid="true"] {
+  border-color: var(--error);
+}
+
+button {
+  padding: 0.6rem 1rem;
+  border: 2px solid var(--teal);
+  border-radius: 8px;
+  background: var(--teal);
+  color: var(--teal-ink);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button.secondary {
+  background: transparent;
+  color: var(--teal);
+}
+
+button.link {
+  margin-top: 1.5rem;
+  border: 0;
+  background: none;
+  color: var(--teal);
+  text-decoration: underline;
+  padding: 0.5rem 0;
+}
+
+.actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.field-error { color: var(--error); margin-block: 0.25rem 0; }
+.field-error::before { content: "⚠ "; }
+
+.error-summary {
+  border-left: 5px solid var(--error);
+  background: #fff4f4;
+  padding: 0.75rem 1rem;
+  margin-block: 1rem;
+  color: var(--error);
+}
+.error-summary ul { margin: 0; padding-left: 1.25rem; }
+.error-summary a { color: inherit; }
+
+.badge {
+  display: inline-block;
+  margin-block: 0.5rem;
+  padding: 0.25rem 0.6rem;
+  border: 2px solid var(--teal);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--teal);
+  font-weight: 600;
+}
+.badge[data-status="OFFLINE"] {
+  border-style: dashed;
+  color: var(--ink);
+}
+.badge[data-status="PENDING"] {
+  border-style: dotted;
+}
+
+.feedback { min-height: 1.5rem; margin-block: 1rem 0; }
+
+[hidden] { display: none !important; }
