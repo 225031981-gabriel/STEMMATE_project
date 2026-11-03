@@ -7,30 +7,22 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-
 <main>
 
   <section id="screen-signin" aria-labelledby="signin-heading">
     <h1 id="signin-heading">STEMMate</h1>
-    <p class="subtitle">Sign in to prepare a session.</p>
+    <p class="subtitle">Secure access to your saved work.</p>
+    
+    <div id="message" class="feedback" role="alert"></div>
 
-    <div id="signin-error" class="field-error" role="alert" hidden></div>
+    <label for="pinInput">Enter your PIN (6-8 digits)</label>
+    <input id="pinInput" type="password" inputmode="numeric" maxlength="8" required aria-describedby="pin-help">
+    <p id="pin-help" class="subtitle">Create a PIN the first time. Use it to sign in later.</p>
 
-    <form id="signin-form" novalidate>
-      <label for="username">Username</label>
-      <input id="username" name="username" type="text"
-             autocomplete="username" required
-             aria-describedby="username-error">
-      <p id="username-error" class="field-error" hidden></p>
-
-      <label for="pin">PIN</label>
-      <input id="pin" name="pin" type="password" inputmode="numeric"
-             autocomplete="current-password" required
-             aria-describedby="pin-error">
-      <p id="pin-error" class="field-error" hidden></p>
-
-      <button type="submit">Sign in</button>
-    </form>
+    <div class="actions">
+        <button id="createPinButton" class="secondary">Create PIN</button>
+        <button id="signInButton">Sign In</button>
+    </div>
   </section>
 
   <section id="screen-plan" aria-labelledby="plan-heading" hidden>
@@ -49,34 +41,27 @@
 
     <form id="plan-form" novalidate>
       <label for="title">Title</label>
-      <input id="title" name="title" type="text" required
-             aria-describedby="title-error">
+      <input id="title" name="title" type="text" required aria-describedby="title-error">
       <p id="title-error" class="field-error" hidden></p>
 
       <label for="steps">Steps</label>
-      <textarea id="steps" name="steps" rows="4" required
-                aria-describedby="steps-error"></textarea>
+      <textarea id="steps" name="steps" rows="4" required aria-describedby="steps-error"></textarea>
       <p id="steps-error" class="field-error" hidden></p>
 
       <label for="timing_minutes">Timing (minutes)</label>
-      <input id="timing_minutes" name="timing_minutes" type="number"
-             min="1" inputmode="numeric" required
-             aria-describedby="timing_minutes-error">
+      <input id="timing_minutes" name="timing_minutes" type="number" min="1" inputmode="numeric" required aria-describedby="timing_minutes-error">
       <p id="timing_minutes-error" class="field-error" hidden></p>
 
       <label for="materials">Materials</label>
-      <textarea id="materials" name="materials" rows="2" required
-                aria-describedby="materials-error"></textarea>
+      <textarea id="materials" name="materials" rows="2" required aria-describedby="materials-error"></textarea>
       <p id="materials-error" class="field-error" hidden></p>
 
       <label for="safety_notes">Safety notes</label>
-      <textarea id="safety_notes" name="safety_notes" rows="2" required
-                aria-describedby="safety_notes-error"></textarea>
+      <textarea id="safety_notes" name="safety_notes" rows="2" required aria-describedby="safety_notes-error"></textarea>
       <p id="safety_notes-error" class="field-error" hidden></p>
 
       <label for="inclusion_prompt">Inclusion prompt</label>
-      <textarea id="inclusion_prompt" name="inclusion_prompt" rows="2" required
-                aria-describedby="inclusion_prompt-error"></textarea>
+      <textarea id="inclusion_prompt" name="inclusion_prompt" rows="2" required aria-describedby="inclusion_prompt-error"></textarea>
       <p id="inclusion_prompt-error" class="field-error" hidden></p>
 
       <div class="actions">
@@ -86,11 +71,11 @@
     </form>
 
     <p id="plan-feedback" class="feedback" aria-live="polite"></p>
-
     <button type="button" id="btn-signout" class="link">Sign out</button>
   </section>
 </main>
 
+<script src="authentication.js"></script>
 <script type="module" src="ui.js"></script>
 </body>
 </html>
