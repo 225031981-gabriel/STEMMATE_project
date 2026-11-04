@@ -1,3 +1,4 @@
+
 const pinInput = document.getElementById("pinInput");
 const createPinButton = document.getElementById("createPinButton");
 const signInButton = document.getElementById("signInButton");
@@ -142,4 +143,5 @@ function signOut() {
 }
 
 createPinButton.addEventListener("click", createPIN);
+
 signInButton.addEventListener("click", signIn);

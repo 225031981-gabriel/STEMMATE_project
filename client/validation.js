@@ -20,6 +20,11 @@ const isPositiveNumber = (value) =>
 const isNonEmptyArray = (value) =>
   Array.isArray(value) && value.length > 0;
 
+/**
+ * Validate a STEMMate session plan.
+ * @param {object} plan Session plan to validate.
+ * @returns {{ valid: boolean, errors: Array<{field: string, message: string}> }}
+ */
 export function validatePlan(plan) {
   const errors = [];
   const safePlan = plan && typeof plan === "object" && !Array.isArray(plan)
@@ -72,6 +77,7 @@ export function validatePlan(plan) {
       safePlan.inclusionPrompts.some((prompt) => !isNonEmptyString(prompt))) {
     addError("inclusionPrompts", "Please add at least one inclusion prompt.");
   }
+
 
   if (safePlan.preparationNotes !== undefined &&
       typeof safePlan.preparationNotes !== "string") {
