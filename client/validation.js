@@ -1,15 +1,3 @@
-/**
- * STEMMate Namibia — Pack 3
- * validation.js
- *
- * Responsibility:
- * - Validate activity and session plan data.
- * - Return field-level errors in a consistent format.
- *
- * This module is client-side validation for the coursework prototype.
- * A real production server must validate submitted data again.
- */
-
 export const REQUIRED_PLAN_FIELDS = [
   "activityId",
   "activityTitle",
@@ -32,11 +20,6 @@ const isPositiveNumber = (value) =>
 const isNonEmptyArray = (value) =>
   Array.isArray(value) && value.length > 0;
 
-/**
- * Validate a STEMMate session plan.
- * @param {object} plan Session plan to validate.
- * @returns {{ valid: boolean, errors: Array<{field: string, message: string}> }}
- */
 export function validatePlan(plan) {
   const errors = [];
   const safePlan = plan && typeof plan === "object" && !Array.isArray(plan)
@@ -90,7 +73,6 @@ export function validatePlan(plan) {
     addError("inclusionPrompts", "Please add at least one inclusion prompt.");
   }
 
-  // Optional field: if supplied, it must be a string.
   if (safePlan.preparationNotes !== undefined &&
       typeof safePlan.preparationNotes !== "string") {
     addError("preparationNotes", "Please enter preparation notes as text.");
