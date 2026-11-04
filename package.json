@@ -18,6 +18,7 @@
   "homepage": "https://github.com/225031981-gabriel/STEMMATE_project#readme",
   "devDependencies": {
     "@playwright/test": "^1.64.1",
-    "@types/node": "^26.6.5"
+    "@types/node": "^26.6.5",
+    "vitest": "^5.1.0"
   }
 }
