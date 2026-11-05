@@ -4,14 +4,17 @@ const URL = 'http://127.0.0.1:5500/client/index.html';
 
 test('T02: Error summary appears and receives focus on empty submit', async ({ page }) => {
   await page.goto(URL);
-  await page.locator('#username').fill('facilitator');
-  await page.locator('#pin').fill('1234');
-  await page.locator('#signin-form button[type="submit"]').click();
   
-  await page.locator('#btn-complete').click();
+  // Sign in
+  await page.locator('#pin').fill('123456');
+  await page.locator('#create-pin').click();
+  await expect(page.locator('#plan-view')).toBeVisible();
+  
+  // Click Save without filling anything
+  await page.locator('#save-btn').click();
 
-  const summary = page.locator('#error-summary');
+  const summary = page.locator('#summary');
   await expect(summary).toBeVisible();
   await expect(summary).toBeFocused();
-  await expect(page.locator('#title-error')).toBeVisible();
+  await expect(page.locator('#title-err')).toBeVisible();
 });

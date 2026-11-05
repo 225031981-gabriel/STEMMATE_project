@@ -4,10 +4,11 @@ const URL = 'http://127.0.0.1:5500/client/index.html';
 
 test('T17: Every form control has an accessible label', async ({ page }) => {
   await page.goto(URL);
-  await page.locator('#username').fill('facilitator');
-  await page.locator('#pin').fill('1234');
-  await page.locator('#signin-form button[type="submit"]').click();
-  await expect(page.locator('#plan-form')).toBeVisible();
+  
+  // Sign in
+  await page.locator('#pin').fill('123456');
+  await page.locator('#create-pin').click();
+  await expect(page.locator('#plan-view')).toBeVisible();
 
   const unlabelled = await page.$$eval(
     'input, select, textarea',

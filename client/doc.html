@@ -1,1 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Design &amp; Quality | STEMMate Namibia</title>
+<style>
+  :root { --bg:#faf5e9; --ink:#1b1f1d; --green:#0f5a45; --line:#cfc8b6; --red:#8a1020; --card:#fff; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif; }
+  main { max-width:860px; margin:0 auto; padding:24px 16px 64px; }
+  h1,h2,h3 { margin:0 0 8px; } h2 { margin-top:40px; border-top:2px solid var(--line); padding-top:16px; } h3 { margin-top:20px; font-size:18px; }
+  a { color:var(--green); } a:focus-visible { outline:3px solid #b5541a; outline-offset:1px; }
+  nav ul { list-style:none; padding:0; display:flex; flex-wrap:wrap; gap:6px 16px; margin:12px 0; }
+  .wrap { overflow-x:auto; } table { border-collapse:collapse; width:100%; background:var(--card); font-size:14px; }
+  caption { text-align:left; font-weight:600; padding:6px 0; }
+  th,td { border:1px solid var(--line); padding:6px 8px; vertical-align:top; text-align:left; } th { background:#efe8d4; }
+  .pass { color:var(--green); font-weight:700; } .pend { color:var(--red); font-weight:700; }
+  figure { margin:16px 0; background:var(--card); border:1px solid var(--line); border-radius:8px; padding:8px; }
+  figcaption { font-size:14px; padding:4px 8px; } svg { width:100%; height:auto; display:block; }
+  svg text { font:13px system-ui,sans-serif; fill:#1b1f1d; } svg .box { fill:#e6f2ec; stroke:#0f5a45; stroke-width:2; }
+  svg .fut { fill:#fff; stroke:#8a1020; stroke-width:2; stroke-dasharray:6 4; } svg .ln { stroke:#1b1f1d; stroke-width:1.5; fill:none; }
+  .note { background:#fdeff0; border-left:5px solid var(--red); padding:8px 14px; }
+  code { background:#efe8d4; padding:1px 5px; border-radius:4px; }
+</style>
+</head>
+<body>
+<main>
+<h1>STEMMate Namibia: design and quality evidence</h1>
+<p>Assessment 4, SDN621S. Updated 4 Nov 2026. <a href="index.html">Session plan</a> | <a href="index.html#library">Saved plans</a></p>
+<nav aria-label="On this page"><ul>
+<li><a href="#req">Requirements</a></li><li><a href="#arch">Diagrams</a></li><li><a href="#data">Data model</a></li><li><a href="#access">Access rules</a></li>
+<li><a href="#dec">Decisions</a></li><li><a href="#qual">Users, security, errors, cost</a></li><li><a href="#tests">Tests</a></li><li><a href="#a11y">Accessibility and recovery</a></li><li><a href="#problems">Problems log</a></li></ul></nav>
+<p class="note"><strong>Honesty note.</strong> "Pass" marks below are only for checks that were actually run (the 12 automated tests, run with Node v22 on 4 Nov 2026). Manual checks are marked <span class="pend">Not yet run</span> until you run them in the browser and type in the real result.</p>
 
+<h2 id="req">1. Requirements</h2>
+<div class="wrap"><table><caption>Requirements the design and tests trace back to (edit wording to match your brief)</caption>
+<tr><th>ID</th><th>Requirement</th><th>Status</th></tr>
+<tr><td>R1</td><td>Facilitators can save, load, edit, delete and download session plans.</td><td>Implemented</td></tr>
+<tr><td>R2</td><td>Plans are validated; errors are clear and linked to the field.</td><td>Implemented</td></tr>
+<tr><td>R3</td><td>Interface is accessible (labels, keyboard, error summary, focus, contrast).</td><td>Implemented, checks pending</td></tr>
+<tr><td>R4</td><td>Works when the connection is lost; the user is told.</td><td>Implemented (offline-first)</td></tr>
+<tr><td>R5</td><td>Saved plans survive closing the browser or restarting the device.</td><td>Implemented</td></tr>
+<tr><td>R6</td><td>Information is protected: PIN sign-in, hashed PIN, attempt lockout.</td><td>Implemented (local only)</td></tr>
+<tr><td>R7</td><td>Supports different users and devices (new facilitators, screen-reader, keyboard, low-bandwidth).</td><td>Partly: see section 6</td></tr>
+<tr><td>R8</td><td>Recovers from errors: corrupted data, full storage, interrupted editing.</td><td>Implemented</td></tr>
+<tr><td>R9</td><td>Affordable to maintain: no server cost, small codebase, automated tests.</td><td>Implemented</td></tr>
+<tr><td>R10</td><td>Architecture documented and traceable to requirements and tests.</td><td>This page</td></tr>
+</table></div>
+
+<h2 id="arch">2. System, component and deployment diagrams</h2>
+<figure><svg viewBox="0 0 760 210" role="img" aria-labelledby="d1t d1d"><title id="d1t">System context diagram</title><desc id="d1d">A facilitator uses the STEMMate web client, which stores data in the browser. A future server is shown dashed.</desc>
+<rect class="box" x="20" y="70" width="150" height="70" rx="8"/><text x="45" y="100">Facilitator</text><text x="38" y="120">(teacher / volunteer)</text>
+<rect class="box" x="300" y="55" width="190" height="100" rx="8"/><text x="335" y="95">STEMMate client</text><text x="322" y="115">static HTML, CSS, JS</text>
+<rect class="box" x="590" y="20" width="150" height="60" rx="8"/><text x="607" y="55">Browser storage</text>
+<rect class="fut" x="590" y="130" width="150" height="60" rx="8"/><text x="615" y="155">Future server</text><text x="612" y="173">(sync, roles)</text>
+<path class="ln" d="M170 105H300"/><path class="ln" d="M490 80L590 55"/><path class="ln" stroke-dasharray="6 4" d="M490 130L590 155"/>
+<text x="205" y="98">uses</text><text x="515" y="60">R1 R5</text></svg>
+<figcaption>Figure 1. System context. Solid = built. Dashed = designed, not built (R7 roles, sync).</figcaption></figure>
+
+<figure><svg viewBox="0 0 760 250" role="img" aria-labelledby="d2t d2d"><title id="d2t">Component diagram</title><desc id="d2d">Two pages depend on store.js, which uses localStorage; a session flag in sessionStorage links the pages.</desc>
+<rect class="box" x="20" y="20" width="200" height="70" rx="8"/><text x="40" y="50">index.html</text><text x="40" y="70">Sign-in + Session plan form</text>
+<rect class="box" x="20" y="150" width="200" height="70" rx="8"/><text x="40" y="180">Library view</text><text x="40" y="200">inside index.html</text>
+<rect class="box" x="300" y="80" width="200" height="90" rx="8"/><text x="330" y="110">store.js</text><text x="318" y="130">save/load, validate,</text><text x="318" y="148">PIN hash + lockout, draft</text>
+<rect class="box" x="580" y="30" width="160" height="60" rx="8"/><text x="600" y="65">localStorage</text>
+<rect class="box" x="580" y="160" width="160" height="60" rx="8"/><text x="595" y="187">sessionStorage</text><text x="605" y="205">(signed-in flag)</text>
+<path class="ln" d="M220 55L300 100"/><path class="ln" d="M220 185L300 150"/><path class="ln" d="M500 110L580 65"/><path class="ln" d="M220 70L580 180" stroke-dasharray="3 3"/>
+<text x="345" y="225">tests/store.test.js tests store.js</text></svg>
+<figcaption>Figure 2. Components. All rules live in <code>store.js</code> so both pages behave the same (R1, R2, R6, R8).</figcaption></figure>
+
+<figure><svg viewBox="0 0 760 220" role="img" aria-labelledby="d3t d3d"><title id="d3t">Deployment diagram</title><desc id="d3d">Static files are served from a static host or Live Server to the user's browser, where data is stored.</desc>
+<rect class="box" x="20" y="30" width="200" height="150" rx="8"/><text x="40" y="55">Static host</text><text x="40" y="78">index.html store.js</text><text x="40" y="98">docs.html</text><text x="40" y="125">Dev: VS Code Live Server</text><text x="40" y="145">127.0.0.1:5500</text><text x="40" y="165">Live: free static hosting (HTTPS)</text>
+<rect class="box" x="330" y="30" width="400" height="150" rx="8"/><text x="350" y="55">User device (phone or laptop)</text>
+<rect class="box" x="350" y="75" width="170" height="85" rx="8"/><text x="370" y="105">Browser</text><text x="370" y="125">runs JS, caches files</text>
+<rect class="box" x="545" y="75" width="170" height="85" rx="8"/><text x="565" y="105">Local data</text><text x="565" y="125">plans, hashed PIN</text>
+<path class="ln" d="M220 105H350"/><text x="245" y="98">HTTPS</text><path class="ln" d="M520 118H545"/></svg>
+<figcaption>Figure 3. Deployment. Only static files travel over the network; plans never leave the device (R6, R9).</figcaption></figure>
+
+<h2 id="data">3. Data model</h2>
+<figure><svg viewBox="0 0 760 230" role="img" aria-labelledby="d4t d4d"><title id="d4t">Data model</title><desc id="d4d">Plan records in a list, one Auth record, one Lock record and one Draft record, all in localStorage.</desc>
+<rect class="box" x="20" y="20" width="250" height="190" rx="8"/><text x="40" y="45" style="font-weight:700">Plan  (stemmate.plans.v1, list)</text><text x="40" y="70">id (uuid, key)</text><text x="40" y="90">title, steps, materials</text><text x="40" y="110">safety, inclusion (text)</text><text x="40" y="130">timing (minutes, 1-600)</text><text x="40" y="150">createdAt, updatedAt (ms)</text>
+<rect class="box" x="310" y="20" width="200" height="85" rx="8"/><text x="325" y="45" style="font-weight:700">Auth  (.auth.v1)</text><text x="325" y="70">salt</text><text x="325" y="90">hash (SHA-256)</text>
+<rect class="box" x="310" y="125" width="200" height="85" rx="8"/><text x="325" y="150" style="font-weight:700">Lock  (.lock.v1)</text><text x="325" y="175">fails</text><text x="325" y="195">until (ms)</text>
+<rect class="box" x="550" y="20" width="190" height="85" rx="8"/><text x="565" y="45" style="font-weight:700">Draft  (.draft.v1)</text><text x="565" y="70">same fields as Plan</text><text x="565" y="90">unsaved copy</text></svg>
+<figcaption>Figure 4. Data model. One signed-in facilitator owns all plans on the device (R1, R6, R8).</figcaption></figure>
+
+<h2 id="access">4. Access rules</h2>
+<div class="wrap"><table><caption>Who may do what</caption>
+<tr><th>Role</th><th>Sign in</th><th>Create / edit / delete plans</th><th>Read plans</th><th>Status</th><th>Req.</th></tr>
+<tr><td>Not signed in</td><td>PIN needed</td><td>No</td><td>No (the library needs the PIN)</td><td>Implemented</td><td>R6</td></tr>
+<tr><td>Facilitator (PIN holder)</td><td>6-8 digit PIN, 5 wrong tries = 60 s lock</td><td>Yes, own plans</td><td>Yes</td><td>Implemented</td><td>R1, R6</td></tr>
+<tr><td>Reviewer / mentor</td><td>Own account</td><td>No</td><td>Read-only</td><td>Designed (needs server)</td><td>R7</td></tr>
+<tr><td>Coordinator</td><td>Own account</td><td>No</td><td>Read shared plans, manage accounts</td><td>Designed (needs server)</td><td>R7</td></tr></table></div>
+
+<h2 id="dec">5. Important decisions, options and trade-offs</h2>
+<h3>D1. Where plans are stored (R1, R4, R5, R9)</h3>
+<p><strong>Options:</strong> (a) server database, (b) browser <code>localStorage</code>, (c) IndexedDB. <strong>Chosen: (b).</strong> Works with no signal, costs nothing, needs no account system and is simple to test. <strong>Trade-offs:</strong> data stays on one device and browser, about 5 MB limit, and a cleared browser loses plans. Mitigation: JSON export/import in the library view. IndexedDB would hold more but is more code to test.</p>
+<h3>D2. How the PIN is protected (R6)</h3>
+<p><strong>Options:</strong> (a) plain text, (b) salted SHA-256 hash, (c) server-side login. <strong>Chosen: (b) plus a 5-attempt lockout.</strong> The PIN is never stored. <strong>Trade-offs:</strong> a 6-8 digit PIN can be brute-forced by someone who copies the stored hash, and the plans themselves are not encrypted. This stops casual access, not a determined attacker. (c) is stronger but needs a server and running costs.</p>
+<h3>D3. One shared storage module (R9, R10)</h3>
+<p><strong>Options:</strong> (a) code inside each page, (b) shared <code>store.js</code>. <strong>Chosen: (b).</strong> One place for rules, and it can be tested without a browser. <strong>Trade-offs:</strong> one more file to deploy, and pages break if it is missing. The earlier single-file version was easier to copy but duplicated logic and could not be unit tested.</p>
+<h3>D4. Sign-in across pages (R6, R7)</h3>
+<p><strong>Options:</strong> (a) ask for the PIN on every page, (b) a flag in <code>sessionStorage</code>. <strong>Chosen: (b).</strong> One sign-in per tab; it clears when the tab closes. <strong>Trade-off:</strong> anyone using the same open tab is signed in, so the Sign out button matters on shared devices.</p>
+
+<h2 id="qual">6. How the project meets the quality goals</h2>
+<div class="wrap"><table>
+<tr><th>Goal</th><th>What the project does</th><th>Not covered / limits</th></tr>
+<tr><td>Different users (R7)</td><td>Plain-language labels; keyboard-only use; labelled fields and a linked error summary for screen readers; responsive layout for phones; works offline; tiny files for slow connections; "Inclusion prompt" field supports inclusive teaching.</td><td>Only one role is built. Reviewer and Coordinator roles, and other languages, are designed but not implemented.</td></tr>
+<tr><td>Protects information (R6)</td><td>PIN gate, hashed PIN, lockout, data stays on the device, nothing sent over the network, the library view needs the PIN.</td><td>No encryption of plans; anyone with the unlocked device and browser tools can read storage.</td></tr>
+<tr><td>Lost connection and errors (R4, R8)</td><td>Offline-first, so saving needs no network. The badge shows Online or Offline. Full or blocked storage shows an error instead of failing silently. Corrupted data is copied to <code>.corrupt</code> before reset. Unsaved edits are kept as a draft and restored after a refresh or crash.</td><td>No automatic sync, so there is nothing to retry.</td></tr>
+<tr><td>Affordable maintenance (R9)</td><td>No server, no database, no build step, no dependencies. Free static hosting. About 600 lines in total. <code>node --test tests/store.test.js</code> re-checks the rules in under a second.</td><td>If a server is added later, hosting and security costs begin.</td></tr></table></div>
+
+<h2 id="tests">7. Tests</h2>
+<h3>Automated tests (<code>node --test tests/store.test.js</code>, Node v22.23.4, 4 Nov 2026)</h3>
+<div class="wrap"><table>
+<tr><th>ID</th><th>What it checks</th><th>Req.</th><th>Result</th></tr>
+<tr><td>AT1</td><td>Saved plan survives a simulated restart</td><td>R1, R5</td><td class="pass">Pass</td></tr>
+<tr><td>AT2</td><td>Validation rejects empty fields and bad timing</td><td>R2</td><td class="pass">Pass</td></tr>
+<tr><td>AT3</td><td>PIN stored hashed; wrong PIN rejected</td><td>R6</td><td class="pass">Pass</td></tr>
+<tr><td>AT4</td><td>5 wrong PINs lock sign-in, then unlock</td><td>R6</td><td class="pass">Pass</td></tr>
+<tr><td>AT5</td><td>Corrupted storage backed up, no crash</td><td>R8</td><td class="pass">Pass</td></tr>
+<tr><td>AT6</td><td>Full storage returns failure, no crash</td><td>R8</td><td class="pass">Pass</td></tr>
+<tr><td>AT7</td><td>Draft recoverable and clearable</td><td>R8</td><td class="pass">Pass</td></tr>
+<tr><td>AT9</td><td>Online/Offline choice remembered after restart</td><td>R4</td><td class="pass">Pass</td></tr>
+<tr><td>AT10</td><td>Export then import restores a deleted plan</td><td>R5, R8</td><td class="pass">Pass</td></tr>
+<tr><td>AT11</td><td>Bad import file rejected, existing plans kept</td><td>R8</td><td class="pass">Pass</td></tr>
+<tr><td>AT12</td><td>Download text holds every field; filename is safe</td><td>R1</td><td class="pass">Pass</td></tr>
+<tr><td>AT8</td><td>Edit keeps one record; delete removes it</td><td>R1</td><td class="pass">Pass</td></tr></table></div>
+<p>Result: 12 run, 12 passed, 0 failed. Limitation: these run in Node with a fake <code>localStorage</code>, so they test the logic, not the pages in a real browser.</p>
+<h3>Documented manual tests (run each in the browser, then record the real result)</h3>
+<div class="wrap"><table>
+<tr><th>ID</th><th>Steps</th><th>Expected</th><th>Req.</th><th>Actual result</th></tr>
+<tr><td>T1</td><td>Open index.html, press Create PIN with "123"</td><td>Message: PIN must be 6 to 8 digits</td><td>R6</td><td class="pend">Not yet run</td></tr>
+<tr><td>T2</td><td>Create PIN 12345678, then sign out and sign in with it</td><td>Session plan form opens</td><td>R6</td><td class="pend">Not yet run</td></tr>
+<tr><td>T3</td><td>Sign in with a wrong PIN</td><td>"Incorrect PIN", attempts left shown</td><td>R6</td><td class="pend">Not yet run</td></tr>
+<tr><td>T4</td><td>Enter 5 wrong PINs, then the right one</td><td>Locked message with seconds; works after 60 s</td><td>R6</td><td class="pend">Not yet run</td></tr>
+<tr><td>T5</td><td>Press Save plan with an empty form</td><td>Error summary and 6 field errors; focus on summary</td><td>R2, R3</td><td class="pend">Not yet run</td></tr>
+<tr><td>T6</td><td>Enter timing "abc"</td><td>Timing error, not saved</td><td>R2</td><td class="pend">Not yet run</td></tr>
+<tr><td>T7</td><td>Fill all fields and Save</td><td>"Plan saved" and plan appears in list</td><td>R1</td><td class="pend">Not yet run</td></tr>
+<tr><td>T8</td><td>Close the browser fully, reopen, sign in</td><td>Plan still listed; Load fills the form</td><td>R1, R5</td><td class="pend">Not yet run</td></tr>
+<tr><td>T9</td><td>Edit a saved plan and Save</td><td>Still one entry, new content</td><td>R1</td><td class="pend">Not yet run</td></tr>
+<tr><td>T10</td><td>Delete a plan and confirm</td><td>Plan gone from the library list</td><td>R1</td><td class="pend">Not yet run</td></tr>
+<tr><td>T11</td><td>Open index.html#library in a new tab without signing in</td><td>PIN screen first; library opens after sign-in</td><td>R6</td><td class="pend">Not yet run</td></tr>
+<tr><td>T12</td><td>In the library press Open to edit</td><td>Session plan form opens with that plan loaded</td><td>R1, R10</td><td class="pend">Not yet run</td></tr>
+<tr><td>T14</td><td>Press the Online badge, then refresh the page</td><td>Badge switches to Offline; plans still save; choice kept after refresh</td><td>R4</td><td class="pend">Not yet run</td></tr>
+<tr><td>T15</td><td>Fill the form, press Download plan; then use Download on a card in the library</td><td>A .txt file is saved with all six fields; empty title shows an error</td><td>R1, R2</td><td class="pend">Not yet run</td></tr>
+<tr><td>T13</td><td>In the library press Export all, delete a plan, then Import JSON with that file</td><td>Plan restored</td><td>R5, R8</td><td class="pend">Not yet run</td></tr></table></div>
+
+<h2 id="a11y">8. Accessibility and recovery checks</h2>
+<div class="wrap"><table>
+<tr><th>ID</th><th>Check</th><th>Req.</th><th>Actual result</th></tr>
+<tr><td>A1</td><td>Complete the whole flow with keyboard only (Tab, Enter, Shift+Tab)</td><td>R3</td><td class="pend">Not yet run</td></tr>
+<tr><td>A2</td><td>Error summary links move focus to the right field</td><td>R3</td><td class="pend">Not yet run</td></tr>
+<tr><td>A3</td><td>Screen reader (NVDA or Narrator) reads labels, errors and Online/Offline status</td><td>R3</td><td class="pend">Not yet run</td></tr>
+<tr><td>A4</td><td>Text contrast measured with a checker (target 4.5:1), page zoomed to 200%</td><td>R3</td><td class="pend">Not yet run</td></tr>
+<tr><td>RC1</td><td>Type half a plan, refresh the page, sign in</td><td>R8</td><td class="pend">Not yet run (automated AT7 covers the logic)</td></tr>
+<tr><td>RC2</td><td>Browser DevTools, Network, Offline: save a plan</td><td>R4</td><td class="pend">Not yet run</td></tr>
+<tr><td>RC3</td><td>Damage the stored plans text in DevTools, reload</td><td>R8</td><td class="pend">Not yet run (automated AT5 covers the logic)</td></tr></table></div>
+
+<h2 id="problems">9. Problems log</h2>
+<div class="wrap"><table>
+<tr><th>#</th><th>Problem</th><th>Found by</th><th>Fix / status</th></tr>
+<tr><td>P1</td><td>After moving logic to <code>store.js</code>, <code>index.html</code> still had an old <code>validate</code> function, causing "Identifier 'validate' has already been declared" and a blank page.</td><td>Syntax check, 4 Nov 2026</td><td>Fixed: old function removed.</td></tr>
+<tr><td>P2</td><td><code>node --test tests/</code> fails on Node 22 (treats the folder as a module).</td><td>First test run</td><td>Fixed: use <code>node --test tests/store.test.js</code>.</td></tr>
+<tr><td>P3</td><td>The pages were not run in a real browser, so T1-T13, A1-A4 and RC1-RC3 have no results yet.</td><td>Review</td><td>Open: run them and fill in the results above.</td></tr>
+<tr><td>P4</td><td>The optional <code>plans.html</code> keeps its own old copy of the storage and import code, which the automated tests do not cover.</td><td>Review</td><td>Fixed for the main app: export/import now lives in <code>store.js</code> (AT10, AT11 pass). Delete <code>plans.html</code> to avoid two versions.</td></tr>
+<tr><td>P5</td><td>Plans are not encrypted and the PIN is brute-forceable offline (see D2).</td><td>Review</td><td>Accepted risk, documented.</td></tr><tr><td>P6</td><td>Clicking "Saved Plans library" gave "404 This page could not be found" because the project's server did not serve the separate <code>plans.html</code> file.</td><td>Reported when run on the project's server, 4 Nov 2026</td><td>Fixed in design: library is now a view inside <code>index.html</code>, so no extra file is needed. Retest with T7 to T12.</td></tr></table></div>
+</main>
+</body>
+</html>

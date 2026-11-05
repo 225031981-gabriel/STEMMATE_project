@@ -1,120 +1,85 @@
-import { PLAN_STATUS, markPlanAsSynced } from "./status.js";
-
+const PLAN_STATUS = { DRAFT: "Draft", PENDING: "Pending", SYNCED: "Synced" };
+const CONFLICT = "Conflict";
 const QUEUE_KEY = "stemmate.queue";
-const CONFLICT = "Conflict"; 
 
-let reportStatus = function () {};      
+let reportStatus = function () {};
 let isSignedIn = function () { return true; };
+let isOffline = function () { return false; };  
 let demoConflict = false;
 let conflictItemId = null;
 let syncing = false;
 
-export function getQueue() {
-  try {
-    const saved = localStorage.getItem(QUEUE_KEY);
-    return saved ? JSON.parse(saved) : [];
-  } catch (e) {
-    return [];
-  }
-}
+const online = () => navigator.onLine && !isOffline();
 
-function saveQueue(queue) {
-  localStorage.setItem(QUEUE_KEY, JSON.stringify(queue));
+export function getQueue() {
+  try { const s = localStorage.getItem(QUEUE_KEY); return s ? JSON.parse(s) : []; }
+  catch (e) { return []; }
 }
+function saveQueue(q) { localStorage.setItem(QUEUE_KEY, JSON.stringify(q)); }
 
 function markItem(id, status) {
-  const queue = getQueue();
-  const item = queue.find(function (i) { return i.id === id; });
-  if (item) {
-    item.status = status;
-    saveQueue(queue);
-  }
+  const q = getQueue(), item = q.find(i => i.id === id);
+  if (item) { item.status = status; saveQueue(q); }
   renderQueue();
 }
+const countPending = () => getQueue().filter(i => i.status === PLAN_STATUS.PENDING).length;
+function showMessage(text) { const el = document.getElementById("sync-message"); if (el) el.textContent = text; }
 
-function countPending() {
-  return getQueue().filter(function (i) {
-    return i.status === PLAN_STATUS.PENDING;
-  }).length;
-}
-function showMessage(text) {
-  const el = document.getElementById("sync-message");
-  if (el) el.textContent = text;
-}
-
-function statusLabel(status) {
-  if (status === PLAN_STATUS.PENDING) return "Waiting to sync";
-  if (status === PLAN_STATUS.SYNCED) return "Synced";
-  if (status === CONFLICT) return "Needs your choice";
-  return status;
+function statusLabel(s) {
+  if (s === PLAN_STATUS.PENDING) return "Waiting to sync";
+  if (s === PLAN_STATUS.SYNCED) return "Synced (simulated)";
+  if (s === CONFLICT) return "Needs your choice";
+  return s;
 }
 
 export function renderQueue() {
-  const list = document.getElementById("plan-list");
+  const list = document.getElementById("sync-list");
   if (!list) return;
   list.replaceChildren();
   for (const item of getQueue()) {
     const li = document.createElement("li");
-    li.textContent = item.plan.title + " - " + statusLabel(item.status);
+    li.textContent = (item.plan.title || "(untitled)") + " - " + statusLabel(item.status);
     list.appendChild(li);
   }
 }
-export function queuePlan(plan) {
-  const queue = getQueue();
-  queue.push({ id: Date.now(), plan: { ...plan }, status: PLAN_STATUS.PENDING });
-  saveQueue(queue);
-  renderQueue();
 
-  if (!navigator.onLine) {
-    showMessage("No internet. Your plan is saved and will sync later.");
-  } else {
-    syncNow();
-  }
+export function queuePlan(plan) {
+
+  const q = getQueue().filter(i => !(i.status === PLAN_STATUS.PENDING && i.plan.id === plan.id));
+  q.push({ id: Date.now() + Math.random(), plan: { ...plan }, status: PLAN_STATUS.PENDING });
+  saveQueue(q);
+  renderQueue();
+  if (!online()) showMessage("No connection. Your plan is saved and will sync later.");
+  else syncNow();
 }
+
 function mockServerSave(item, whenDone) {
   setTimeout(function () {
-    if (!navigator.onLine) {
-      whenDone("offline");
-    } else if (demoConflict) {
-      whenDone("conflict"); 
-    } else {
-      whenDone("ok");       
-    }
+    if (!online()) whenDone("offline");
+    else if (demoConflict) whenDone("conflict");
+    else whenDone("ok");
   }, 800);
 }
-export function syncNow() {
-  if (!isSignedIn()) {
-    showMessage("Sign in to sync your plans.");
-    return;
-  }
-  if (!navigator.onLine) {
-    showMessage("No internet. Your plans are saved and will sync later.");
-    return;
-  }
-  if (syncing) return;
-  if (countPending() === 0) {
-    showMessage("Nothing to sync.");
-    return;
-  }
 
+export function syncNow() {
+  if (!isSignedIn()) { showMessage("Sign in to sync your plans."); return; }
+  if (!online()) { showMessage("No connection. Your plans are saved and will sync later."); return; }
+  if (syncing) return;
+  if (countPending() === 0) { showMessage("Nothing to sync."); return; }
   syncing = true;
-  showMessage("Syncing...");
+  showMessage("Syncing (simulated)...");
   syncNext();
 }
-function syncNext() {
-  const queue = getQueue();
-  const item = queue.find(function (i) { return i.status === PLAN_STATUS.PENDING; });
 
+function syncNext() {
+  const q = getQueue();
+  const item = q.find(i => i.status === PLAN_STATUS.PENDING);
   if (!item) {
     syncing = false;
     renderQueue();
-    if (!queue.some(function (i) { return i.status === CONFLICT; })) {
-      showMessage("Synced successfully.");
-      reportStatus("SYNCED");
-    }
+    if (!q.some(i => i.status === CONFLICT)) { showMessage("Synced successfully (simulated)."); reportStatus("SYNCED"); }
     return;
   }
-
   mockServerSave(item, function (result) {
     if (result === "offline") {
       syncing = false;
@@ -122,76 +87,43 @@ function syncNext() {
       reportStatus("OFFLINE");
       return;
     }
-    if (result === "conflict") {
-      syncing = false;
-      markItem(item.id, CONFLICT);
-      showConflict(item.id);
-      return;
-    }
-    const confirmed = markPlanAsSynced(item.plan, true);
-    markItem(item.id, confirmed.status);
+    if (result === "conflict") { syncing = false; markItem(item.id, CONFLICT); showConflict(item.id); return; }
+    markItem(item.id, PLAN_STATUS.SYNCED);
     syncNext();
   });
 }
+
 function showConflict(planId) {
   conflictItemId = planId;
   const box = document.getElementById("conflict-box");
-  if (box) {
-    box.hidden = false;
-    box.focus();
-  }
+  if (box) { box.hidden = false; box.focus(); }
   showMessage("");
 }
 
 function resolveConflict(choice) {
   if (conflictItemId === null) return;
-
-  const queue = getQueue();
-  const item = queue.find(function (i) { return i.id === conflictItemId; });
-  if (item) {
-    item.resolution = choice;
-    item.status = PLAN_STATUS.SYNCED;
-    saveQueue(queue);
-  }
-
+  const q = getQueue(), item = q.find(i => i.id === conflictItemId);
+  if (item) { item.resolution = choice; item.status = PLAN_STATUS.SYNCED; saveQueue(q); }
   conflictItemId = null;
   demoConflict = false;
   document.getElementById("conflict-box").hidden = true;
   renderQueue();
-  showMessage(choice === "mine" ? "Kept your version. Synced." : "Used the server version. Synced.");
+  showMessage(choice === "mine" ? "Kept your version. Synced (simulated)." : "Used the server version. Synced (simulated).");
+  if (countPending() > 0 && online()) { syncing = true; syncNext(); } else reportStatus("SYNCED");
+}
 
-  if (countPending() > 0 && navigator.onLine) {
-    syncing = true;
-    syncNext();
-  } else {
-    reportStatus("SYNCED");
-  }
-}
-function on(id, eventName, handler) {
-  const el = document.getElementById(id);
-  if (el) el.addEventListener(eventName, handler);
-}
+function on(id, ev, fn) { const el = document.getElementById(id); if (el) el.addEventListener(ev, fn); }
 
 export function initSync(options = {}) {
   if (options.setStatus) reportStatus = options.setStatus;
   if (options.isSignedIn) isSignedIn = options.isSignedIn;
-
+  if (options.isOffline) isOffline = options.isOffline;
   on("btn-sync", "click", syncNow);
-  on("btn-keep-mine", "click", function () { resolveConflict("mine"); });
-  on("btn-use-server", "click", function () { resolveConflict("server"); });
-  on("btn-demo-conflict", "click", function () {
-    demoConflict = true;
-    showMessage("Demo on: the next sync finds a newer version.");
-  });
-
-  window.addEventListener("online", function () {
-    reportStatus("ONLINE");
-    if (countPending() > 0) syncNow();
-  });
-  window.addEventListener("offline", function () {
-    reportStatus("OFFLINE");
-  });
-
-  reportStatus(navigator.onLine ? "ONLINE" : "OFFLINE");
+  on("btn-keep-mine", "click", () => resolveConflict("mine"));
+  on("btn-use-server", "click", () => resolveConflict("server"));
+  on("btn-demo-conflict", "click", () => { demoConflict = true; showMessage("Demo on: the next sync finds a newer version."); });
+  window.addEventListener("online", () => { reportStatus("ONLINE"); if (countPending() > 0) syncNow(); });
+  window.addEventListener("offline", () => reportStatus("OFFLINE"));
+  reportStatus(online() ? "ONLINE" : "OFFLINE");
   renderQueue();
 }

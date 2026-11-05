@@ -1,81 +1,406 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>STEMMate Namibia</title>
-  <link rel="stylesheet" href="styles.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>STEMMate Namibia</title>
+<style>
+  :root { --bg:#faf5e9; --ink:#1b1f1d; --green:#0f5a45; --green-ink:#fff; --line:#cfc8b6; --red:#8a1020; --red-bg:#fdeff0; --card:#fff; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif; }
+  main { max-width:540px; margin:0 auto; padding:24px 16px 64px; }
+  h1, h2 { margin:0 0 8px; }
+  label { display:block; font-weight:600; margin:18px 0 6px; }
+  button, input, textarea, select, a[href] { min-height:44px; min-width:44px; font:inherit; }
+  input, textarea { width:100%; padding:10px 12px; color:inherit; background:#fff; border:2px solid var(--line); border-radius:8px; }
+  input:focus, textarea:focus, button:focus-visible, a:focus-visible { outline:3px solid #b5541a; outline-offset:1px; }
+  textarea { min-height:90px; resize:vertical; }
+  .hint { font-size:14px; margin:6px 0 0; }
+  .btn { font:inherit; font-weight:600; padding:10px 18px; border-radius:8px; cursor:pointer; border:2px solid var(--green); background:transparent; color:var(--green); text-decoration:none; display:inline-block; }
+  .btn.primary { background:var(--green); color:var(--green-ink); }
+  .btn.danger { border-color:var(--red); color:var(--red); }
+  .btn.small { padding:6px 12px; font-size:14px; }
+  .row { display:flex; gap:12px; flex-wrap:wrap; margin-top:20px; align-items:center; }
+  .badge { display:inline-block; padding:4px 12px; border:2px solid var(--green); border-radius:999px; color:var(--green); font-weight:600; }
+  .badge.offline { border-color:var(--red); color:var(--red); }
+  .error-summary { background:var(--red-bg); border-left:5px solid var(--red); color:var(--red); padding:12px 16px; margin:18px 0; }
+  .error-summary h2 { font-size:18px; } .error-summary a { color:var(--red); }
+  .field-error { color:var(--red); margin:6px 0 0; }
+  .invalid { border-color:var(--red); }
+  .status { margin:14px 0 0; padding:10px 14px; border-radius:8px; background:#e6f2ec; color:var(--green); font-weight:600; }
+  .status.err { background:var(--red-bg); color:var(--red); }
+  .saved { margin-top:36px; border-top:2px solid var(--line); padding-top:12px; }
+  .plan { display:flex; justify-content:space-between; align-items:center; gap:12px; background:var(--card); border:1px solid var(--line); border-radius:8px; padding:10px 12px; margin-top:10px; }
+  .plan.active { border:2px solid var(--green); }
+  .plan small { display:block; color:#555; }
+  .plan-actions { display:flex; gap:8px; flex-shrink:0; }
+  button.badge { font:inherit; font-weight:600; background:transparent; cursor:pointer; }
+  button.badge:hover { background:#e6f2ec; } button.badge.offline:hover { background:var(--red-bg); }
+  #net-note { margin-left:8px; font-size:14px; }
+  #greeting-text { font-size:18px; font-weight:600; color:var(--green); margin-bottom:15px; }
+  #sync-list { padding-left:20px; }
+  #conflict-box { border:3px solid var(--red); border-radius:8px; background:var(--red-bg); padding:12px 16px; margin-top:14px; }
+  [hidden] { display:none !important; }
+</style>
 </head>
 <body>
 <main>
 
-  <section id="screen-signin" aria-labelledby="signin-heading">
-    <h1 id="signin-heading">STEMMate</h1>
-    <p class="subtitle">Secure access to your saved work.</p>
-    
-    <div id="message" class="feedback" role="alert"></div>
-
-    <label for="pinInput">Enter your PIN (6-8 digits)</label>
-    <input id="pinInput" type="password" inputmode="numeric" maxlength="8" required aria-describedby="pin-help">
-    <p id="pin-help" class="subtitle">Create a PIN the first time. Use it to sign in later.</p>
-
-    <div class="actions">
-        <button id="createPinButton" class="secondary">Create PIN</button>
-        <button id="signInButton">Sign In</button>
+  <section id="auth-view">
+    <h1>STEMMate</h1>
+    <p>Secure access to your saved work.</p>
+    <p id="auth-msg" role="alert"></p>
+    <label for="user-name">Your Name (Optional)</label>
+    <input id="user-name" type="text" placeholder="e.g. Paulina" autocomplete="name">
+    <label for="pin">Enter your PIN (6-8 digits)</label>
+    <input id="pin" type="password" inputmode="numeric" autocomplete="off" maxlength="8" aria-describedby="pin-hint">
+    <p class="hint" id="pin-hint">Create a PIN the first time. Use it to sign in later.</p>
+    <div class="row">
+      <button class="btn" id="create-pin" type="button">Create PIN</button>
+      <button class="btn primary" id="sign-in" type="button">Sign In</button>
     </div>
   </section>
 
-  <section id="screen-plan" aria-labelledby="plan-heading" hidden>
-    <h1 id="plan-heading">Session plan</h1>
+  <section id="plan-view" hidden>
+    <h1>Session plan</h1>
+    <p id="greeting-text"></p>
+    <div class="row" style="margin-bottom:20px;">
+      <button type="button" id="open-library" class="btn">📁 Saved Plans</button>
+      <button type="button" id="top-signout-btn" class="btn danger">Sign out</button>
+    </div>
 
-    <p id="status-badge" class="badge" data-status="ONLINE" aria-live="polite">
-      <span class="badge-icon" aria-hidden="true">●</span>
-      <span id="status-text">Online</span>
-    </p>
+    <button type="button" id="net-badge" class="badge" aria-pressed="false">● Online</button>
+    <span id="net-note" class="hint" role="status"></span>
 
-    <div id="error-summary" class="error-summary" role="alert"
-         tabindex="-1" hidden>
-      <h2 id="error-summary-heading">Check these fields</h2>
-      <ul id="error-list"></ul>
+    <div id="summary" class="error-summary" role="alert" tabindex="-1" hidden>
+      <h2>Check these fields</h2>
+      <ul id="summary-list"></ul>
     </div>
 
     <form id="plan-form" novalidate>
       <label for="title">Title</label>
-      <input id="title" name="title" type="text" required aria-describedby="title-error">
-      <p id="title-error" class="field-error" hidden></p>
+      <input id="title" name="title" type="text">
+      <div class="field-error" id="title-err" hidden></div>
 
       <label for="steps">Steps</label>
-      <textarea id="steps" name="steps" rows="4" required aria-describedby="steps-error"></textarea>
-      <p id="steps-error" class="field-error" hidden></p>
+      <textarea id="steps" name="steps"></textarea>
+      <div class="field-error" id="steps-err" hidden></div>
 
-      <label for="timing_minutes">Timing (minutes)</label>
-      <input id="timing_minutes" name="timing_minutes" type="number" min="1" inputmode="numeric" required aria-describedby="timing_minutes-error">
-      <p id="timing_minutes-error" class="field-error" hidden></p>
+      <label for="timing">Timing (minutes)</label>
+      <input id="timing" name="timing" type="text" inputmode="numeric">
+      <div class="field-error" id="timing-err" hidden></div>
 
       <label for="materials">Materials</label>
-      <textarea id="materials" name="materials" rows="2" required aria-describedby="materials-error"></textarea>
-      <p id="materials-error" class="field-error" hidden></p>
+      <textarea id="materials" name="materials"></textarea>
+      <div class="field-error" id="materials-err" hidden></div>
 
-      <label for="safety_notes">Safety notes</label>
-      <textarea id="safety_notes" name="safety_notes" rows="2" required aria-describedby="safety_notes-error"></textarea>
-      <p id="safety_notes-error" class="field-error" hidden></p>
+      <label for="safety">Safety notes</label>
+      <textarea id="safety" name="safety"></textarea>
+      <div class="field-error" id="safety-err" hidden></div>
 
-      <label for="inclusion_prompt">Inclusion prompt</label>
-      <textarea id="inclusion_prompt" name="inclusion_prompt" rows="2" required aria-describedby="inclusion_prompt-error"></textarea>
-      <p id="inclusion_prompt-error" class="field-error" hidden></p>
+      <label for="inclusion">Inclusion prompt</label>
+      <textarea id="inclusion" name="inclusion"></textarea>
+      <div class="field-error" id="inclusion-err" hidden></div>
 
-      <div class="actions">
-        <button type="button" id="btn-save-draft" class="secondary">Save draft</button>
-        <button type="submit" id="btn-complete">Mark complete</button>
+      <div class="row">
+        <button class="btn primary" type="submit" id="save-btn">Save plan</button>
+        <button class="btn" type="button" id="new-btn">New plan</button>
+        <button class="btn" type="button" id="download-btn">Download plan</button>
       </div>
     </form>
 
-    <p id="plan-feedback" class="feedback" aria-live="polite"></p>
-    <button type="button" id="btn-signout" class="link">Sign out</button>
+    <p id="status" class="status" role="status" hidden></p>
+
+    <div class="saved">
+      <h2>Saved plans</h2>
+      <div id="plan-list" aria-live="polite"></div>
+    </div>
+
+    <div class="saved">
+      <h2>Sync queue (simulated server)</h2>
+      <p class="hint">Saved plans wait here until the simulated sync runs. No data leaves this device.</p>
+      <p id="sync-message" class="hint" role="status"></p>
+      <ul id="sync-list" aria-live="polite"></ul>
+      <div class="row">
+        <button type="button" id="btn-sync" class="btn">Sync now</button>
+        <button type="button" id="btn-demo-conflict" class="btn">Demo: next sync finds a newer version</button>
+      </div>
+      <div id="conflict-box" role="alert" tabindex="-1" hidden>
+        <h2>A newer version exists</h2>
+        <p>Choose which version to keep.</p>
+        <div class="row">
+          <button type="button" id="btn-keep-mine" class="btn primary">Keep my version</button>
+          <button type="button" id="btn-use-server" class="btn">Use the server version</button>
+        </div>
+      </div>
+    </div>
   </section>
+
+  <section id="library-view" hidden>
+    <h1>Saved plans</h1>
+    <p><a href="#" id="back-to-form-lib" class="btn small">&larr; Back to Session plan</a></p>
+    <label for="lib-search">Search plans</label>
+    <input id="lib-search" type="search" placeholder="Search by title, steps or materials">
+    <div class="row">
+      <button class="btn" id="export-btn" type="button">Export all (JSON)</button>
+      <label class="btn" for="import-file" style="margin:0;display:inline-block">Import JSON</label>
+      <input id="import-file" type="file" accept="application/json,.json" hidden>
+    </div>
+    <p id="lib-status" class="status" role="status" hidden></p>
+    <div id="lib-list" aria-live="polite"></div>
+  </section>
+
 </main>
 
-<script src="authentication.js"></script>
-<script type="module" src="ui.js"></script>
+<script src="store.js"></script>
+<script>
+const validate = Store.validate;
+const $ = id => document.getElementById(id);
+const FIELDS = [
+  { id: "title", label: "Title" }, { id: "steps", label: "Steps" }, { id: "timing", label: "Timing (minutes)" },
+  { id: "materials", label: "Materials" }, { id: "safety", label: "Safety notes" }, { id: "inclusion", label: "Inclusion prompt" }
+];
+const SESSION_KEY = "stemmate.session";
+let currentId = null;
+
+function authMsg(text) { $("auth-msg").textContent = text; }
+function saveName() { const n = $("user-name").value.trim(); if (n) localStorage.setItem("stemmate.username", n); }
+
+$("create-pin").addEventListener("click", async () => {
+  saveName();
+  const r = await Store.createPin($("pin").value);
+  if (r.ok) return openPlans();
+  authMsg({ format: "PIN must be 6 to 8 digits.", exists: "A PIN already exists. Please sign in.",
+            storage: "Could not save your PIN (storage unavailable)." }[r.reason]);
+});
+$("sign-in").addEventListener("click", async () => {
+  saveName();
+  const r = await Store.checkPin($("pin").value);
+  if (r.ok) return openPlans();
+  authMsg(r.reason === "nopin" ? "No PIN yet. Choose Create PIN first."
+        : r.reason === "locked" ? "Too many attempts. Try again in " + r.seconds + " seconds."
+        : "Incorrect PIN. Please try again. " + r.left + " attempt(s) left.");
+  $("pin").value = ""; $("pin").focus();
+});
+$("pin").addEventListener("keydown", e => { if (e.key === "Enter") $("sign-in").click(); });
+
+function signedIn() { try { return sessionStorage.getItem(SESSION_KEY) === "1"; } catch (e) { return false; } }
+
+function updateGreeting() {
+  const name = localStorage.getItem("stemmate.username") || "Facilitator";
+  const h = new Date().getHours();
+  $("greeting-text").textContent = (h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening") + ", " + name + "!";
+}
+
+function openPlans() {
+  try { sessionStorage.setItem(SESSION_KEY, "1"); } catch (e) {}
+  $("pin").value = ""; authMsg("");
+  $("auth-view").hidden = true;
+  showView("form");
+  updateGreeting(); renderList();
+  const wanted = new URLSearchParams(location.search).get("plan");
+  const plan = wanted && Store.loadPlan(wanted);
+  if (plan) { currentId = plan.id; fillForm(plan); renderList(); showStatus('Loaded "' + (plan.title || "untitled") + '".'); }
+  const draft = !plan && Store.loadDraft();
+  if (draft) { currentId = draft.id || null; fillForm(draft); showStatus("Restored your unsaved draft."); }
+  $("title").focus();
+  if (location.hash === "#library") showView("library");   
+}
+
+$("top-signout-btn").addEventListener("click", () => {
+  try { sessionStorage.removeItem(SESSION_KEY); } catch (e) {}
+  clearForm();
+  $("auth-view").hidden = false; $("plan-view").hidden = true; $("library-view").hidden = true;
+  $("user-name").value = localStorage.getItem("stemmate.username") || "";
+  $("pin").focus();
+});
+
+function readForm() { const p = { id: currentId }; FIELDS.forEach(f => p[f.id] = $(f.id).value.trim()); return p; }
+function fillForm(plan) { FIELDS.forEach(f => $(f.id).value = plan[f.id] || ""); }
+function clearErrors() {
+  $("summary").hidden = true; $("summary-list").innerHTML = "";
+  FIELDS.forEach(f => { $(f.id).classList.remove("invalid"); $(f.id).removeAttribute("aria-invalid"); $(f.id + "-err").hidden = true; });
+}
+function clearForm() { Store.clearDraft(); currentId = null; fillForm({}); clearErrors(); showStatus(""); renderList(); }
+function showStatus(text, isError) {
+  const el = $("status"); el.textContent = text; el.hidden = !text; el.classList.toggle("err", !!isError);
+}
+
+$("plan-form").addEventListener("input", () => {
+  const p = readForm();
+  if (FIELDS.some(f => p[f.id])) Store.saveDraft(p);
+});
+
+function showErrors(errors) {
+  clearErrors();
+  const list = $("summary-list");
+  errors.forEach(e => {
+    const input = $(e.id), err = $(e.id + "-err");
+    input.classList.add("invalid"); input.setAttribute("aria-invalid", "true");
+    err.textContent = "⚠ " + e.msg; err.hidden = false;
+    const li = document.createElement("li"), a = document.createElement("a");
+    a.href = "#" + e.id; a.textContent = e.msg;
+    a.addEventListener("click", ev => { ev.preventDefault(); input.focus(); });
+    li.appendChild(a); list.appendChild(li);
+  });
+  $("summary").hidden = false; $("summary").focus();
+}
+
+$("plan-form").addEventListener("submit", e => {
+  e.preventDefault();
+  const plan = readForm(), errors = validate(plan);
+  if (errors.length) return showErrors(errors);
+  clearErrors();
+  const saved = Store.savePlan(plan);
+  if (!saved) return showStatus("Could not save. Browser storage is full or blocked.", true);
+  currentId = saved.id;
+  Store.clearDraft();
+  showStatus("Plan saved. It will still be here after you restart.");
+  renderList();
+  if (window.StemSync) window.StemSync.queuePlan(saved);   
+});
+$("new-btn").addEventListener("click", () => { clearForm(); $("title").focus(); });
+
+function renderList() {
+  const box = $("plan-list"); box.innerHTML = "";
+  const plans = Store.listPlans();
+  if (!plans.length) { box.innerHTML = '<p class="hint">No saved plans yet.</p>'; return; }
+  plans.forEach(p => {
+    const row = document.createElement("div");
+    row.className = "plan" + (p.id === currentId ? " active" : "");
+    const info = document.createElement("div"), name = document.createElement("strong"), when = document.createElement("small");
+    name.textContent = p.title || "(untitled)";
+    when.textContent = "Saved " + new Date(p.updatedAt).toLocaleString();
+    info.append(name, when);
+    const actions = document.createElement("div"); actions.className = "plan-actions";
+    const load = document.createElement("button");
+    load.className = "btn small"; load.type = "button"; load.textContent = "Load";
+    load.addEventListener("click", () => {
+      const plan = Store.loadPlan(p.id);
+      if (!plan) return showStatus("That plan could not be found.", true);
+      currentId = plan.id; fillForm(plan); clearErrors();
+      showStatus('Loaded "' + (plan.title || "untitled") + '".'); renderList(); $("title").focus();
+    });
+    const del = document.createElement("button");
+    del.className = "btn small danger"; del.type = "button"; del.textContent = "Delete";
+    del.addEventListener("click", () => {
+      if (!confirm('Delete "' + (p.title || "untitled") + '"?')) return;
+      Store.deletePlan(p.id);
+      if (currentId === p.id) clearForm(); else renderList();
+      showStatus("Plan deleted.");
+    });
+    actions.append(load, del); row.append(info, actions); box.appendChild(row);
+  });
+}
+
+function updateNet() {
+  const b = $("net-badge"), noSignal = !navigator.onLine;
+  const offline = noSignal || Store.getMode() === "offline";
+  b.textContent = offline ? (noSignal ? "● Offline (no connection)" : "● Offline") : "● Online";
+  b.classList.toggle("offline", offline);
+  b.setAttribute("aria-pressed", String(offline));
+  $("net-note").textContent = offline ? "Plans saved on this device only." : "Plans saved on this device.";
+}
+$("net-badge").addEventListener("click", () => {
+  Store.setMode(Store.getMode() !== "offline" ? "offline" : "online");
+  updateNet();
+  if (Store.getMode() === "online" && window.StemSync) window.StemSync.syncNow();
+});
+window.addEventListener("online", updateNet);
+window.addEventListener("offline", updateNet);
+updateNet();
+
+function showView(name) {
+  $("plan-view").hidden = name !== "form";
+  $("library-view").hidden = name !== "library";
+  if (name === "library") { renderLibrary(); $("lib-search").focus(); }
+}
+$("open-library").addEventListener("click", () => showView("library"));
+$("back-to-form-lib").addEventListener("click", e => { e.preventDefault(); showView("form"); $("title").focus(); });
+window.addEventListener("hashchange", () => { if (signedIn() && location.hash === "#library") showView("library"); });
+
+const LIB_LABELS = [["steps","Steps"],["timing","Timing (minutes)"],["materials","Materials"],["safety","Safety notes"],["inclusion","Inclusion prompt"]];
+$("lib-search").addEventListener("input", renderLibrary);
+
+function libStatus(text, isError) {
+  const el = $("lib-status"); el.textContent = text; el.hidden = !text; el.classList.toggle("err", !!isError);
+}
+function renderLibrary() {
+  const q = $("lib-search").value.trim().toLowerCase(), box = $("lib-list");
+  box.innerHTML = "";
+  const plans = Store.listPlans().filter(p => !q || [p.title, p.steps, p.materials].join(" ").toLowerCase().includes(q));
+  if (!plans.length) { box.innerHTML = '<p class="hint">' + (q ? "No plans match your search." : "No saved plans yet.") + "</p>"; return; }
+  plans.forEach(p => {
+    const card = document.createElement("article"); card.className = "plan"; card.style.display = "block";
+    const h = document.createElement("h2"); h.style.fontSize = "18px"; h.textContent = p.title || "(untitled)";
+    const when = document.createElement("small"); when.textContent = "Saved " + new Date(p.updatedAt).toLocaleString();
+    const dl = document.createElement("dl");
+    LIB_LABELS.forEach(([k, label]) => {
+      if (!p[k]) return;
+      const dt = document.createElement("dt"); dt.style.fontWeight = "600"; dt.textContent = label;
+      const dd = document.createElement("dd"); dd.style.cssText = "margin:0 0 6px;white-space:pre-wrap"; dd.textContent = p[k];
+      dl.append(dt, dd);
+    });
+    const acts = document.createElement("div"); acts.className = "plan-actions"; acts.style.marginTop = "10px";
+    const open = document.createElement("button"); open.type = "button"; open.className = "btn small primary"; open.textContent = "Open to edit";
+    open.addEventListener("click", () => {
+      currentId = p.id; fillForm(p); clearErrors(); showView("form");
+      showStatus('Loaded "' + (p.title || "untitled") + '".'); renderList(); $("title").focus();
+    });
+    const dwn = document.createElement("button"); dwn.type = "button"; dwn.className = "btn small"; dwn.textContent = "Download";
+    dwn.addEventListener("click", () => downloadFile(Store.planFilename(p), Store.planToText(p), "text/plain"));
+    const del = document.createElement("button"); del.type = "button"; del.className = "btn small danger"; del.textContent = "Delete";
+    del.addEventListener("click", () => {
+      if (!confirm('Delete "' + (p.title || "untitled") + '"?')) return;
+      Store.deletePlan(p.id); if (currentId === p.id) clearForm(); renderLibrary();
+    });
+    acts.append(open, dwn, del); card.append(h, when, dl, acts); box.appendChild(card);
+  });
+}
+
+$("export-btn").addEventListener("click", () => {
+  downloadFile("stemmate-plans.json", Store.exportPlans(), "application/json");
+  libStatus("Exported " + Store.listPlans().length + " plan(s).");
+});
+$("import-file").addEventListener("change", e => {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    const r = Store.importPlans(String(reader.result));
+    if (r.ok) { libStatus("Imported " + r.added + " plan(s)."); renderLibrary(); renderList(); }
+    else libStatus(r.reason === "storage" ? "Could not import: storage is full or blocked." : "That file is not a valid plans file. Nothing was changed.", true);
+  };
+  reader.readAsText(file); e.target.value = "";
+});
+
+function downloadFile(name, text, type) {
+  const blob = new Blob([text], { type: type + ";charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = name; a.click();
+  URL.revokeObjectURL(a.href);
+}
+$("download-btn").addEventListener("click", () => {
+  const plan = readForm();
+  if (!plan.title) return showErrors([{ id: "title", msg: "Add a title before downloading." }]);
+  clearErrors();
+  const name = Store.planFilename(plan);
+  downloadFile(name, Store.planToText(plan), "text/plain");
+  showStatus("Downloaded " + name + ".");
+});
+
+if (!Store.getAuth()) authMsg("Welcome! Choose a PIN and press Create PIN.");
+$("user-name").value = localStorage.getItem("stemmate.username") || "";
+if (signedIn()) openPlans();
+</script>
+
+<script type="module">
+import { initSync, queuePlan, syncNow } from "./sync.js";
+window.StemSync = { queuePlan, syncNow };
+initSync({
+  isSignedIn: () => { try { return sessionStorage.getItem("stemmate.session") === "1"; } catch (e) { return false; } },
+  isOffline: () => Store.getMode() === "offline",
+  setStatus: () => updateNet()
+});
+</script>
 </body>
 </html>
