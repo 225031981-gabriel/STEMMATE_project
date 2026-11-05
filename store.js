@@ -1,4 +1,3 @@
-/* STEMMate storage + security module. Shared by index.html, plans.html and the automated tests. */
 (function (root) {
   const K = { plans: "stemmate.plans.v1", auth: "stemmate.auth.v1", draft: "stemmate.draft.v1", lock: "stemmate.lock.v1", mode: "stemmate.mode.v1" };
   const MAX_TRIES = 5, LOCK_MS = 60000;
@@ -9,7 +8,7 @@
     let raw = null;
     try { raw = ls().getItem(key); if (raw === null) return fallback; return JSON.parse(raw); }
     catch (e) {
-      // Recovery: keep the damaged text so nothing is lost, then start clean.
+      
       try { if (raw !== null) ls().setItem(key + ".corrupt", raw); } catch (_) {}
       return fallback;
     }
@@ -52,7 +51,7 @@
       const salt = uid();
       return write(K.auth, { salt, hash: await hashPin(pin, salt) }) ? { ok: true } : { ok: false, reason: "storage" };
     },
-    /* Access rule: 5 wrong PINs locks sign-in for 60 seconds. */
+    
     async checkPin(pin, now = Date.now()) {
       const auth = this.getAuth();
       if (!auth) return { ok: false, reason: "nopin" };
@@ -64,11 +63,11 @@
       return { ok: false, reason: "wrong", left: Math.max(0, MAX_TRIES - fails) };
     },
 
-    /* User's chosen mode. The badge shows "offline" if the user chose it OR the device has no connection. */
+   
     getMode() { return read(K.mode, "online") === "offline" ? "offline" : "online"; },
     setMode(m) { return write(K.mode, m === "offline" ? "offline" : "online"); },
 
-    /* Back-up and restore. Import merges by id and keeps only known fields. */
+ 
     exportPlans() { return JSON.stringify(this.listPlans(), null, 2); },
     importPlans(text) {
       let incoming;
@@ -85,7 +84,6 @@
       return write(K.plans, [...byId.values()]) ? { ok: true, added } : { ok: false, reason: "storage" };
     },
 
-    /* Plain-text copy of one plan, for the Download button. */
     planToText(plan) {
       const v = k => String(plan[k] || "").trim() || "(not filled in)";
       return [
