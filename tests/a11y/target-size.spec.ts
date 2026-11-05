@@ -4,10 +4,11 @@ const URL = 'http://127.0.0.1:5500/client/index.html';
 
 test('T18: Interactive targets are at least 44x44 pixels', async ({ page }) => {
   await page.goto(URL);
-  await page.locator('#username').fill('facilitator');
-  await page.locator('#pin').fill('1234');
-  await page.locator('#signin-form button[type="submit"]').click();
-  await expect(page.locator('#plan-form')).toBeVisible();
+  
+  // Sign in
+  await page.locator('#pin').fill('123456');
+  await page.locator('#create-pin').click();
+  await expect(page.locator('#plan-view')).toBeVisible();
 
   const tooSmall = await page.$$eval(
     'button, a[href], input[type=checkbox], input[type=radio], [role=button]',
