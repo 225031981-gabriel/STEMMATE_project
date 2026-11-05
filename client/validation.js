@@ -1,14 +1,4 @@
-/**
- * STEMMate Namibia — Pack 3
- * validation.js
- *
- * Responsibility:
- * - Validate activity and session plan data.
- * - Return field-level errors in a consistent format.
- *
- * This module is client-side validation for the coursework prototype.
- * A real production server must validate submitted data again.
- */
+
 
 export const REQUIRED_PLAN_FIELDS = [
   "activityId",
