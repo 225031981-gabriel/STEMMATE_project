@@ -1,4 +1,3 @@
-// Run with:  node --test tests/
 const test = require("node:test"), assert = require("node:assert");
 class MemStorage { constructor(){this.m=new Map();} getItem(k){return this.m.has(k)?this.m.get(k):null;} setItem(k,v){this.m.set(k,String(v));} removeItem(k){this.m.delete(k);} }
 let Store;
@@ -7,7 +6,7 @@ const plan = { title:"Water filter", steps:"1. Layer sand", timing:"45", materia
 
 test("AT1 (R1,R5) saved plan survives a simulated restart", () => {
   const saved = Store.savePlan(plan);
-  delete require.cache[require.resolve("../store.js")];      // 'restart': reload code, keep storage
+  delete require.cache[require.resolve("../store.js")];    
   const again = require("../store.js");
   assert.equal(again.loadPlan(saved.id).title, "Water filter");
 });
