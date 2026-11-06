@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>STEMMate Namibia - Offline-First Facilitation Platform</title>
+<style>
+  :root {
+    --bg: #faf5e9; --ink: #1b1f1d; --green: #0f5a45; --green-ink: #fff;
+    --line: #cfc8b6; --red: #8a1020; --red-bg: #fdeff0; --card: #fff;
+    --amber: #b45309; --amber-bg: #fef3c7; --blue: #1d4ed8; --blue-bg: #eff6ff;
+  }
+  * { box-sizing: border-box; }
+  body { 
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; 
+  }
+  
+  #auth-screen {
+    max-width: 440px; margin: 60px auto; padding: 24px;
+  }
+  
+  header {
+    background: var(--green); color: var(--green-ink); padding: 16px;
+    display: flex; justify-content: space-between; align-items: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  header h1 { margin: 0; font-size: 1.25rem; }
+  
+  .header-actions { 
+    display: flex; 
+    align-items: center; 
+    gap: 12px; 
+  }
+  
+  .status-badge {
+    padding: 4px 10px; border-radius: 12px; font-size: 0.85rem; font-weight: bold;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .status-online { background: #d1fae5; color: #065f46; }
+  .status-offline { background: var(--red-bg); color: var(--red); }
+  
+  nav {
+    display: flex; background: #eadecd; border-bottom: 2px solid var(--line);
+    overflow-x: auto;
+  }
+  nav button {
+    background: none; border: none; padding: 12px 16px; font-weight: 600;
+    color: var(--ink); cursor: pointer; flex: 1; white-space: nowrap;
+    border-bottom: 3px solid transparent;
+  }
+  nav button.active {
+    background: var(--card); border-bottom-color: var(--green); color: var(--green);
+  }
+
+  main { max-width: 680px; margin: 0 auto; padding: 24px 16px 64px; }
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 8px;
+    padding: 20px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  h2 { margin-top: 0; font-size: 1.2rem; color: var(--green); }
+  
+  label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.95rem; }
+  input, select, textarea {
+    width: 100%; padding: 10px; border: 1px solid var(--line); border-radius: 6px;
+    background: #fff; font-size: 1rem; margin-bottom: 16px; color: var(--ink);
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: 2px solid var(--green); border-color: transparent;
+  }
+  
+  .btn {
+    background: var(--green); color: var(--green-ink); border: none; padding: 10px 18px;
+    border-radius: 6px; font-weight: bold; cursor: pointer; display: inline-flex;
+    align-items: center; gap: 8px; font-size: 0.95rem;
+  }
+  .btn:hover { opacity: 0.9; }
+  .btn-secondary { background: #e5e7eb; color: var(--ink); border: 1px solid var(--line); }
+  .btn-danger { background: var(--red); color: #fff; }
+  .btn-small { padding: 6px 12px; font-size: 0.85rem; }
+  
+  .btn-signout { 
+    background: #ffffff !important; 
+    color: #8a1020 !important; 
+    border: 2px solid #8a1020 !important; 
+    padding: 6px 14px !important; 
+    font-size: 0.85rem !important; 
+    font-weight: bold !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+  }
+  .btn-signout:hover { 
+    background: #fdeff0 !important; 
+  }
+  
+  .badge {
+    display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem;
+    font-weight: bold; background: #e5e7eb; margin-right: 6px; margin-bottom: 4px;
+  }
+  .badge-topic { background: var(--blue-bg); color: var(--blue); }
+  
+  .banner {
+    padding: 12px 16px; border-radius: 6px; margin-bottom: 16px; font-size: 0.95rem;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .banner-warning { background: var(--amber-bg); color: var(--amber); border: 1px solid #fcd34d; }
+  .banner-success { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+  .error-box { background: var(--red-bg); color: var(--red); border: 1px solid #f87171; padding: 12px; border-radius: 6px; margin-bottom: 16px; font-weight: 500; }
+  .error-text { color: var(--red); font-size: 0.9rem; margin-bottom: 12px; font-weight: 500; }
+
+  .app-container { display: none; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+  
+  .filter-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 480px) { .filter-row { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+  <div id="auth-screen">
+    <div style="font-size: 1.5rem; font-weight: bold; color: var(--green); margin-bottom: 4px;">STEMMate</div>
+    <div style="color: #4b5563; margin-bottom: 16px;">Secure access to your saved work.</div>
+    
+    <div id="authErrorMsg" class="error-text" style="display: none;">Incorrect PIN. Please try again.</div>
+    <div id="authSuccessMsg" class="banner banner-success" style="display: none; margin-bottom: 12px;"></div>
+
+    <label for="userPin">Enter your PIN (6-8 digits)</label>
+    <input type="password" id="userPin" maxlength="8" placeholder="••••••••" autofocus>
+    
+    <div style="font-size: 0.9rem; color: #4b5563; margin-bottom: 20px;">
+      Create a <a href="#" onclick="handleCreatePinPrompt(event)" style="color: var(--green); font-weight: 600; text-decoration: underline;">PIN</a> the first time. Use it to sign in later.
+    </div>
+
+    <div style="display: flex; gap: 12px;">
+      <button class="btn btn-secondary" onclick="registerPin()">Create PIN</button>
+      <button class="btn" onclick="verifyPin()">Sign In</button>
+    </div>
+  </div>
+
+  <div id="mainApp" class="app-container">
+    <header>
+      <h1>STEMMate Namibia</h1>
+      <div class="header-actions">
+        <div id="connectionStatus" class="status-badge status-online" aria-live="polite">
+          <span aria-hidden="true">●</span> <span id="statusText">Online (Synced)</span>
+        </div>
+        <button class="btn-signout" onclick="signOut()">Sign Out</button>
+      </div>
+    </header>
+
+    <nav role="navigation" aria-label="Main Navigation">
+      <button id="nav-catalog" class="active" onclick="switchTab('catalog')">Activity Catalog</button>
+      <button id="nav-planner" onclick="switchTab('planner')">Session Planner &amp; Venue Booking</button>
+      <button id="nav-queue" onclick="switchTab('queue')">Offline &amp; Sync Queue (<span id="queueCount">0</span>)</button>
+    </nav>
+
+    <main>
+      <div style="margin-bottom: 16px; display: flex; justify-content: flex-end;">
+        <button class="btn btn-secondary" onclick="toggleNetworkMode()" id="networkToggleBtn" style="font-size: 0.8rem; padding: 6px 12px;">
+          Simulate Offline Mode
+        </button>
+      </div>
+
+      <section id="tab-catalog" class="tab-content active">
+        <h2>Browse STEM Activities</h2>
+        <div id="userWelcomeBanner"></div>
+        <div class="card">
+          <div class="filter-row">
+            <div>
+              <label for="filterTopic">Topic</label>
+              <select id="filterTopic" onchange="filterActivities()">
+                <option value="">All Topics</option>
+                <option value="Biology">Biology</option>
+                <option value="General Science">General Science</option>
+                <option value="Renewable Energy">Renewable Energy</option>
+                <option value="Water &amp; Sanitation">Water &amp; Sanitation</option>
+                <option value="Mechanics">Mechanics</option>
+                <option value="Agriculture &amp; Food Tech">Agriculture &amp; Food Tech</option>
+                <option value="Digital Literacy &amp; Electronics">Digital Literacy &amp; Electronics</option>
+              </select>
+            </div>
+            <div>
+              <label for="filterLevel">Level</label>
+              <select id="filterLevel" onchange="filterActivities()">
+                <option value="">All Levels</option>
+                <option value="Primary">Primary (Upper)</option>
+                <option value="Junior Secondary">Junior Secondary</option>
+                <option value="Senior Secondary">Senior Secondary</option>
+                <option value="Community">Community / Adult</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label for="searchQuery">Search Materials or Keywords</label>
+            <input type="text" id="searchQuery" placeholder="e.g., osmosis, cells, solar, bottles..." oninput="filterActivities()">
+          </div>
+        </div>
+
+        <div id="activitiesContainer">
+        </div>
+      </section>
+
+      <section id="tab-planner" class="tab-content">
+        <h2>Create &amp; Manage Session Plan</h2>
+        <div class="card">
+          <form id="sessionForm" onsubmit="saveSessionPlan(event)">
+            <input type="hidden" id="editingPlanId" value="">
+            
+            <label for="sessionTitle">Session Title *</label>
+            <input type="text" id="sessionTitle" required placeholder="e.g., Cellular Osmosis Demonstration">
+
+            <div class="filter-row">
+              <div>
+                <label for="sessionTarget">Target Audience Level</label>
+                <select id="sessionTarget">
+                  <option value="Primary School">Primary School Group</option>
+                  <option value="Junior Secondary">Junior Secondary</option>
+                  <option value="Senior Secondary">Senior Secondary</option>
+                  <option value="Community Youth">Community Youth Club</option>
+                </select>
+              </div>
+              <div>
+                <label for="sessionDuration">Duration (Minutes)</label>
+                <input type="number" id="sessionDuration" value="45" min="15" max="180">
+              </div>
+            </div>
+
+            <label for="sessionMaterials">Local &amp; Inexpensive Materials Required</label>
+            <textarea id="sessionMaterials" rows="2" placeholder="e.g., Fresh potatoes, table salt, plastic cups, water, ruler..."></textarea>
+
+            <label for="sessionSteps">Facilitation Steps &amp; Timing</label>
+            <textarea id="sessionSteps" rows="5" placeholder="e.g., 
+1. Introduction (10m): Discuss potato cells.
+2. Experiment Setup (20m): Prepare salt solutions and cut potatoes.
+3. Data Collection (15m): Measure and record initial weight.
+4. Osmosis Activity (30m): Place potatoes in solutions.
+5. Analysis (15m): Re-weigh and graph results."></textarea>
+
+            <label for="sessionSafety">Safety Notes &amp; Inclusion Prompts</label>
+            <textarea id="sessionSafety" rows="2" placeholder="e.g., Ensure clean sanitary conditions when handling food items. Pair learners of mixed confidence levels to foster peer support."></textarea>
+
+            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+              <button type="submit" class="btn" id="savePlanBtn">Save Plan (Queue for Sync)</button>
+              <button type="button" class="btn btn-secondary" onclick="downloadSessionPlan()">⬇ Download Session Plan + Venue Booking (.txt)</button>
+              <button type="button" class="btn btn-secondary" id="cancelEditBtn" onclick="resetPlannerForm()" style="display:none;">Cancel Edit</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card" style="border-left: 4px solid var(--green);">
+          <h3 style="margin-top:0; color: var(--green);">Community Venue &amp; Space Reservation</h3>
+          <p style="font-size: 0.9rem; color: #4b5563; margin-bottom: 16px;">
+            Reserve a community hall, school lab, or outdoor shade area for your STEM session.
+          </p>
+
+          <div id="bookingFeedbackContainer"></div>
+
+          <form id="venueBookingForm" onsubmit="bookVenue(event)">
+            <label for="bookingVenueName">Select Venue *</label>
+            <select id="bookingVenueName" required>
+              <option value="">-- Choose a Venue --</option>
+              <option value="Windhoek Community Science Hall A">Windhoek Community Science Hall A</option>
+              <option value="Rundu Regional STEM Lab B">Rundu Regional STEM Lab B</option>
+              <option value="Katutura Youth Center Workshop Space">Katutura Youth Center Workshop Space</option>
+              <option value="Swakopmund Mobile Innovation Tent">Swakopmund Mobile Innovation Tent</option>
+            </select>
+
+            <div class="filter-row">
+              <div>
+                <label for="bookingDate">Date *</label>
+                <input type="date" id="bookingDate" required>
+              </div>
+              <div>
+                <label for="bookingStartTime">Start Time *</label>
+                <input type="time" id="bookingStartTime" required>
+              </div>
+            </div>
+
+            <div class="filter-row">
+              <div>
+                <label for="bookingEndTime">End Time *</label>
+                <input type="time" id="bookingEndTime" required>
+              </div>
+              <div>
+                <label for="bookingFacilitator">Facilitator Name *</label>
+                <input type="text" id="bookingFacilitator" required placeholder="e.g., Martin Siteketa">
+              </div>
+            </div>
+
+            <button type="submit" class="btn">Check Availability &amp; Book Venue</button>
+          </form>
+
+          <h4 style="margin-top: 24px; margin-bottom: 8px;">Current Active Venue Bookings</h4>
+          <div id="venueBookingsList">
+            <p style="color:#666; font-style:italic;">No active venue bookings found.</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 style="margin-top:0; color: var(--green);">View &amp; Edit Previous Saved Plans (Backup Backup)</h3>
+          <p style="font-size: 0.9rem; color: #4b5563; margin-bottom: 16px;">
+            Review previously saved session plans, load them into the form above to edit, or export them as backup files.
+          </p>
+          <div id="editablePlansList">
+            <p style="color:#666; font-style:italic;">No session plans created or saved yet.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="tab-queue" class="tab-content">
+        <h2>Offline Storage &amp; Sync Queue</h2>
+        <div id="syncBannerContainer"></div>
+        
+        <div class="card">
+          <h3 style="margin-top:0;">Saved Offline Activities (<span id="savedCount">0</span>)</h3>
+          <div id="savedActivitiesList">
+            <p style="color:#666; font-style:italic;">No activities saved for offline use yet.</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 style="margin-top:0;">Pending Session Plans (<span id="pendingCount">0</span>)</h3>
+          <div id="pendingPlansList">
+            <p style="color:#666; font-style:italic;">No session plans waiting for synchronization.</p>
+          </div>
+          <div style="margin-top: 16px;">
+            <button class="btn" id="syncNowBtn" onclick="triggerSync()">Synchronise Now</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+<script>
+  const sampleActivities = [
+    {
+      id: 'act-1',
+      title: 'Cellular Osmosis with Potato Cylinders',
+      topic: 'Biology',
+      level: 'Junior Secondary',
+      duration: '60 mins',
+      materials: 'Fresh potatoes, table salt, water, plastic cups, ruler or knife',
+      safety: 'Supervise knife usage when slicing potato samples.',
+      inclusion: 'Encourage collaborative data recording among group members.'
+    },
+    {
+      id: 'act-2',
+      title: 'Local Ecosystem Food Web String Game',
+      topic: 'Biology',
+      level: 'Primary',
+      duration: '45 mins',
+      materials: 'Ball of yarn, printed cards featuring local Namibian flora and fauna',
+      safety: 'Ensure spacious room setup to prevent tripping hazards with yarn.',
+      inclusion: 'Incorporate indigenous names of local plants and wildlife.'
+    },
+    {
+      id: 'act-3',
+      title: 'Microscope Cell Slide Preparation from Onion Skin',
+      topic: 'Biology',
+      level: 'Senior Secondary',
+      duration: '75 mins',
+      materials: 'Onions, iodine stain solution, glass slides, cover slips, hand lens or field microscope',
+      safety: 'Handle iodine staining solution with care to avoid staining skin or clothing.',
+      inclusion: 'Pair students to share lens handling and drawing duties.'
+    },
+    {
+      id: 'act-4',
+      title: 'Density Column in a Bottle',
+      topic: 'General Science',
+      level: 'Primary',
+      duration: '45 mins',
+      materials: 'Clear plastic bottle, honey, dish soap, water, cooking oil, small solid objects',
+      safety: 'Avoid tasting any liquids used in the density column.',
+      inclusion: 'Let learners predict layering order before pouring liquids.'
+    },
+    {
+      id: 'act-5',
+      title: 'Convection Currents and Thermal Energy Transfer',
+      topic: 'General Science',
+      level: 'Junior Secondary',
+      duration: '60 mins',
+      materials: 'Clear container, hot water, cold water, food coloring (two colors)',
+      safety: 'Handle hot water safely with facilitator supervision.',
+      inclusion: 'Relate observations to weather and atmospheric sea breezes.'
+    },
+    {
+      id: 'act-6',
+      title: 'Solar Green Hydrogen Model',
+      topic: 'Renewable Energy',
+      level: 'Junior Secondary',
+      duration: '60 mins',
+      materials: 'Plastic syringe, copper wire, 9V battery, water, salt',
+      safety: 'Wear safety goggles during electrolysis testing.',
+      inclusion: 'Assign rotating roles: builder, sketcher, and presenter.'
+    },
+    {
+      id: 'act-7',
+      title: 'Low-Cost Sand Water Filter',
+      topic: 'Water &amp; Sanitation',
+      level: 'Primary',
+      duration: '45 mins',
+      materials: 'Plastic bottle, clean sand, gravel, charcoal, cotton cloth',
+      safety: 'Emphasize that filtered water is not automatically potable without boiling.',
+      inclusion: 'Encourage participants to share traditional filtration practices.'
+    },
+    {
+      id: 'act-8',
+      title: 'Micro-Drip Irrigation Systems for Gardens',
+      topic: 'Agriculture &amp; Food Tech',
+      level: 'Senior Secondary',
+      duration: '75 mins',
+      materials: 'Used plastic bottles, fine pins for perforation, nylon string, tubing',
+      safety: 'Supervise needle/pin usage when puncturing plastic emitters.',
+      inclusion: 'Incorporate local indigenous drought-resistant crop planting knowledge.'
+    }
+  ];
+
+  let currentUserPin = null;
+  let state = {
+    isOnline: true,
+    savedActivityIds: [],
+    pendingPlans: [],
+    venueBookings: JSON.parse(localStorage.getItem('stemmate_bookings') || '[]'),
+    isNewUser: false
+  };
+
+  function verifyPin() {
+    const inputPin = document.getElementById('userPin').value;
+    const storedPin = localStorage.getItem('stemmate_user_pin');
+
+    const errEl = document.getElementById('authErrorMsg');
+    const successEl = document.getElementById('authSuccessMsg');
+    errEl.style.display = 'none';
+    successEl.style.display = 'none';
+
+    if (!storedPin) {
+      errEl.textContent = 'No PIN found. Please create a PIN first.';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    if (inputPin === storedPin) {
+      currentUserPin = inputPin;
+      const userVisitedKey = 'stemmate_visited_' + currentUserPin;
+      const hasVisited = localStorage.getItem(userVisitedKey);
+      state.isNewUser = !hasVisited;
+
+      if (!hasVisited) {
+        localStorage.setItem(userVisitedKey, 'true');
+      }
+
+      state.savedActivityIds = JSON.parse(localStorage.getItem('stemmate_saved_' + currentUserPin) || '[]');
+      state.pendingPlans = JSON.parse(localStorage.getItem('stemmate_plans_' + currentUserPin) || '[]');
+
+      document.getElementById('auth-screen').style.display = 'none';
+      document.getElementById('mainApp').style.display = 'block';
+      initApp();
+    } else {
+      errEl.textContent = 'Incorrect PIN. Please try again.';
+      errEl.style.display = 'block';
+    }
+  }
+
+  function registerPin() {
+    const inputPin = document.getElementById('userPin').value;
+    const errEl = document.getElementById('authErrorMsg');
+    const successEl = document.getElementById('authSuccessMsg');
+    errEl.style.display = 'none';
+    successEl.style.display = 'none';
+
+    if (inputPin.length < 6 || inputPin.length > 8) {
+      errEl.textContent = 'PIN must be between 6 and 8 digits long.';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    localStorage.setItem('stemmate_user_pin', inputPin);
+    successEl.textContent = 'PIN created successfully! You can now sign in.';
+    successEl.style.display = 'block';
+  }
+
+  function handleCreatePinPrompt(e) {
+    e.preventDefault();
+    document.getElementById('userPin').focus();
+    alert('Enter 6 to 8 digits in the box above, then click "Create PIN".');
+  }
+
+  function signOut() {
+    currentUserPin = null;
+    document.getElementById('mainApp').style.display = 'none';
+    document.getElementById('auth-screen').style.display = 'block';
+    document.getElementById('userPin').value = '';
+    document.getElementById('authErrorMsg').style.display = 'none';
+    document.getElementById('authSuccessMsg').style.display = 'none';
+  }
+
+  function initApp() {
+    renderUserWelcomeBanner();
+    filterActivities();
+    updateQueueUI();
+    renderEditablePlansList();
+    renderBookingsList();
+  }
+
+  function renderUserWelcomeBanner() {
+    const bannerContainer = document.getElementById('userWelcomeBanner');
+    if (state.isNewUser) {
+      bannerContainer.innerHTML = `<div class="banner banner-success">👋 Welcome new user! Your private workspace has been successfully initialized. Your saved activities and plans remain completely private to your PIN.</div>`;
+    } else {
+      bannerContainer.innerHTML = `<div class="banner banner-success" style="background:#eff6ff; color:#1d4ed8; border-color:#bfdbfe;">🔓 Welcome back! Your previous personal workspace and drafts have been restored securely.</div>`;
+    }
+  }
+
+  function switchTab(tabId) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('nav button').forEach(el => el.classList.remove('active'));
+    
+    document.getElementById('tab-' + tabId).classList.add('active');
+    document.getElementById('nav-' + tabId).classList.add('active');
+  }
+
+  function toggleNetworkMode() {
+    state.isOnline = !state.isOnline;
+    const btn = document.getElementById('networkToggleBtn');
+    const badge = document.getElementById('connectionStatus');
+    const statusText = document.getElementById('statusText');
+
+    if (state.isOnline) {
+      btn.textContent = 'Simulate Offline Mode';
+      badge.className = 'status-badge status-online';
+      statusText.textContent = 'Online (Synced)';
+    } else {
+      btn.textContent = 'Simulate Online Mode';
+      badge.className = 'status-badge status-offline';
+      statusText.textContent = 'Offline (Queue Active)';
+    }
+    updateQueueUI();
+  }
+
+  function filterActivities() {
+    const topic = document.getElementById('filterTopic').value;
+    const level = document.getElementById('filterLevel').value;
+    const query = document.getElementById('searchQuery').value.toLowerCase();
+
+    const filtered = sampleActivities.filter(act => {
+      const matchTopic = !topic || act.topic === topic;
+      const matchLevel = !level || act.level === level;
+      const matchQuery = !query || act.title.toLowerCase().includes(query) || act.materials.toLowerCase().includes(query);
+      return matchTopic && matchLevel && matchQuery;
+    });
+
+    const container = document.getElementById('activitiesContainer');
+    if (filtered.length === 0) {
+      container.innerHTML = '<div class="card"><p>No activities match your current filter criteria.</p></div>';
+      return;
+    }
+
+    container.innerHTML = filtered.map(act => {
+      const isSaved = state.savedActivityIds.includes(act.id);
+      return `
+        <div class="card">
+          <span class="badge badge-topic">${act.topic}</span>
+          <span class="badge">${act.level}</span>
+          <span class="badge">⏱ ${act.duration}</span>
+          <h3 style="margin: 10px 0 6px;">${act.title}</h3>
+          <p style="margin: 0 0 12px; font-size: 0.95rem;"><strong>Materials:</strong> ${act.materials}</p>
+          <button class="btn ${isSaved ? 'btn-secondary' : ''}" onclick="toggleSaveActivity('${act.id}')">
+            ${isSaved ? '✓ Saved Offline' : 'Save for Offline Use'}
+          </button>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function toggleSaveActivity(id) {
+    if (state.savedActivityIds.includes(id)) {
+      state.savedActivityIds = state.savedActivityIds.filter(item => item !== id);
+    } else {
+      state.savedActivityIds.push(id);
+    }
+    localStorage.setItem('stemmate_saved_' + currentUserPin, JSON.stringify(state.savedActivityIds));
+    filterActivities();
+    updateQueueUI();
+  }
+
+  function bookVenue(e) {
+    e.preventDefault();
+    const venueName = document.getElementById('bookingVenueName').value;
+    const date = document.getElementById('bookingDate').value;
+    const startTime = document.getElementById('bookingStartTime').value;
+    const endTime = document.getElementById('bookingEndTime').value;
+    const facilitator = document.getElementById('bookingFacilitator').value;
+    const feedbackEl = document.getElementById('bookingFeedbackContainer');
+
+    feedbackEl.innerHTML = '';
+
+    if (startTime >= endTime) {
+      feedbackEl.innerHTML = `<div class="error-box">Error: End time must be after start time.</div>`;
+      return;
+    }
+
+    const conflict = state.venueBookings.find(b => {
+      if (b.venueName !== venueName || b.date !== date) return false;
+      return (startTime < b.endTime) && (endTime > b.startTime);
+    });
+
+    if (conflict) {
+      feedbackEl.innerHTML = `
+        <div class="error-box">
+          <strong>❌ Venue Already Booked!</strong><br>
+          ${venueName} is already reserved on ${date} from <strong>${conflict.startTime}</strong> to <strong>${conflict.endTime}</strong> (Duration: ${conflict.startTime} – ${conflict.endTime}, Booked by: ${conflict.facilitator}).
+        </div>`;
+      return;
+    }
+
+    const newBooking = {
+      id: 'booking-' + Date.now(),
+      venueName,
+      date,
+      startTime,
+      endTime,
+      facilitator
+    };
+
+    state.venueBookings.push(newBooking);
+    localStorage.setItem('stemmate_bookings', JSON.stringify(state.venueBookings));
+
+    feedbackEl.innerHTML = `<div class="banner banner-success">✅ Venue successfully booked and confirmed for ${date} (${startTime} - ${endTime})!</div>`;
+    document.getElementById('venueBookingForm').reset();
+    renderBookingsList();
+  }
+
+  function renderBookingsList() {
+    const container = document.getElementById('venueBookingsList');
+    if (state.venueBookings.length === 0) {
+      container.innerHTML = '<p style="color:#666; font-style:italic;">No active venue bookings found.</p>';
+      return;
+    }
+
+    container.innerHTML = state.venueBookings.map(b => `
+      <div style="padding: 10px 12px; border: 1px solid var(--line); border-radius: 6px; margin-bottom: 8px; background: #fff; display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <strong>${b.venueName}</strong>
+          <div style="font-size: 0.85rem; color: #555; margin-top: 2px;">
+            📅 Date: ${b.date} | ⏰ Time: ${b.startTime} – ${b.endTime} | 👤 Facilitator: ${b.facilitator}
+          </div>
+        </div>
+        <button class="btn btn-danger btn-small" onclick="cancelBooking('${b.id}')">Cancel</button>
+      </div>
+    `).join('');
+  }
+
+  function cancelBooking(id) {
+    if (confirm('Are you sure you want to cancel this venue reservation?')) {
+      state.venueBookings = state.venueBookings.filter(b => b.id !== id);
+      localStorage.setItem('stemmate_bookings', JSON.stringify(state.venueBookings));
+      renderBookingsList();
+      document.getElementById('bookingFeedbackContainer').innerHTML = `<div class="banner banner-warning">Venue reservation cancelled successfully.</div>`;
+    }
+  }
+
+  function saveSessionPlan(e) {
+    e.preventDefault();
+    const editingId = document.getElementById('editingPlanId').value;
+    
+    const planData = {
+      id: editingId ? editingId : 'plan-' + Date.now(),
+      title: document.getElementById('sessionTitle').value,
+      target: document.getElementById('sessionTarget').value,
+      duration: document.getElementById('sessionDuration').value,
+      materials: document.getElementById('sessionMaterials').value,
+      steps: document.getElementById('sessionSteps').value,
+      safety: document.getElementById('sessionSafety').value,
+      timestamp: new Date().toLocaleString(),
+      synced: false
+    };
+
+    if (editingId) {
+      const index = state.pendingPlans.findIndex(p => p.id === editingId);
+      if (index !== -1) {
+        state.pendingPlans[index] = planData;
+      }
+      alert('Session plan updated successfully!');
+    } else {
+      state.pendingPlans.push(planData);
+      alert('Session plan saved successfully! Queued for offline synchronization.');
+    }
+
+    localStorage.setItem('stemmate_plans_' + currentUserPin, JSON.stringify(state.pendingPlans));
+    resetPlannerForm();
+    updateQueueUI();
+    renderEditablePlansList();
+  }
+
+  function editSessionPlan(id) {
+    const plan = state.pendingPlans.find(p => p.id === id);
+    if (!plan) return;
+
+    document.getElementById('editingPlanId').value = plan.id;
+    document.getElementById('sessionTitle').value = plan.title;
+    document.getElementById('sessionTarget').value = plan.target;
+    document.getElementById('sessionDuration').value = plan.duration;
+    document.getElementById('sessionMaterials').value = plan.materials;
+    document.getElementById('sessionSteps').value = plan.steps;
+    document.getElementById('sessionSafety').value = plan.safety;
+
+    document.getElementById('savePlanBtn').textContent = 'Update Session Plan';
+    document.getElementById('cancelEditBtn').style.display = 'inline-block';
+    
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function resetPlannerForm() {
+    document.getElementById('sessionForm').reset();
+    document.getElementById('editingPlanId').value = '';
+    document.getElementById('savePlanBtn').textContent = 'Save Plan (Queue for Sync)';
+    document.getElementById('cancelEditBtn').style.display = 'none';
+  }
+
+  function renderEditablePlansList() {
+    const container = document.getElementById('editablePlansList');
+    if (state.pendingPlans.length === 0) {
+      container.innerHTML = '<p style="color:#666; font-style:italic;">No session plans created or saved yet.</p>';
+      return;
+    }
+
+    container.innerHTML = state.pendingPlans.map(p => `
+      <div style="padding: 12px; border: 1px solid var(--line); border-radius: 6px; margin-bottom: 10px; background: #fff;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+          <div>
+            <strong>${p.title}</strong>
+            <div style="font-size: 0.85rem; color: #555; margin-top: 2px;">
+              Audience: ${p.target} | Duration: ${p.duration}m | Saved: ${p.timestamp}
+            </div>
+          </div>
+          <span class="badge" style="background:${p.synced ? '#d1fae5' : '#fef3c7'}; color:${p.synced ? '#065f46' : '#b45309'};">
+            ${p.synced ? 'Synced' : 'Local Draft'}
+          </span>
+        </div>
+        <div style="margin-top: 10px; display:flex; gap: 8px;">
+          <button class="btn btn-secondary btn-small" onclick="editSessionPlan('${p.id}')">✏ Edit Plan</button>
+          <button class="btn btn-secondary btn-small" onclick="downloadSpecificPlan('${p.id}')">⬇ Export Backup (.txt)</button>
+          <button class="btn btn-danger btn-small" onclick="deletePlan('${p.id}')">Delete</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function deletePlan(id) {
+    if (confirm('Are you sure you want to delete this saved session plan?')) {
+      state.pendingPlans = state.pendingPlans.filter(p => p.id !== id);
+      localStorage.setItem('stemmate_plans_' + currentUserPin, JSON.stringify(state.pendingPlans));
+      updateQueueUI();
+      renderEditablePlansList();
+      resetPlannerForm();
+    }
+  }
+
+  function getBookingsTextSummary() {
+    if (state.venueBookings.length === 0) {
+      return 'No venue reservations currently recorded.';
+    }
+    return state.venueBookings.map(b => 
+      `Venue: ${b.venueName}\n` +
+      `Date: ${b.date}\n` +
+      `Time: ${b.startTime} - ${b.endTime}\n` +
+      `Facilitator: ${b.facilitator}\n` +
+      `----------------------------------------`
+    ).join('\n');
+  }
+
+  function downloadSpecificPlan(id) {
+    const p = state.pendingPlans.find(item => item.id === id);
+    if (!p) return;
+
+    const bookingsSummary = getBookingsTextSummary();
+
+    const fileContent = `========================================\n` +
+                        `STEMMATE NAMIBIA - SESSION PLAN BACKUP\n` +
+                        `========================================\n` +
+                        `Title: ${p.title}\n` +
+                        `Target Audience: ${p.target}\n` +
+                        `Duration: ${p.duration} minutes\n` +
+                        `Last Saved/Updated: ${p.timestamp}\n\n` +
+                        `----------------------------------------\n` +
+                        `MATERIALS REQUIRED:\n` +
+                        `----------------------------------------\n` +
+                        `${p.materials || 'None specified.'}\n\n` +
+                        `----------------------------------------\n` +
+                        `FACILITATION STEPS & TIMING:\n` +
+                        `----------------------------------------\n` +
+                        `${p.steps || 'None specified.'}\n\n` +
+                        `----------------------------------------\n` +
+                        `SAFETY NOTES & INCLUSION PROMPTS:\n` +
+                        `----------------------------------------\n` +
+                        `${p.safety || 'None specified.'}\n\n` +
+                        `----------------------------------------\n` +
+                        `LINKED VENUE BOOKINGS & RESERVATIONS:\n` +
+                        `----------------------------------------\n` +
+                        `${bookingsSummary}\n`;
+
+    const blob = new Blob([fileContent], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${p.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_backup.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function downloadSessionPlan() {
+    const title = document.getElementById('sessionTitle').value || 'Untitled_Session_Plan';
+    const target = document.getElementById('sessionTarget').value;
+    const duration = document.getElementById('sessionDuration').value;
+    const materials = document.getElementById('sessionMaterials').value || document.getElementById('sessionMaterials').placeholder;
+    const steps = document.getElementById('sessionSteps').value || document.getElementById('sessionSteps').placeholder;
+    const safety = document.getElementById('sessionSafety').value || document.getElementById('sessionSafety').placeholder;
+    
+    const bookingsSummary = getBookingsTextSummary();
+
+    const fileContent = `========================================\n` +
+                        `STEMMATE NAMIBIA - SESSION PLAN\n` +
+                        `========================================\n` +
+                        `Title: ${title}\n` +
+                        `Target Audience: ${target}\n` +
+                        `Duration: ${duration} minutes\n` +
+                        `Generated: ${new Date().toLocaleString()}\n\n` +
+                        `----------------------------------------\n` +
+                        `MATERIALS REQUIRED:\n` +
+                        `----------------------------------------\n` +
+                        `${materials}\n\n` +
+                        `----------------------------------------\n` +
+                        `FACILITATION STEPS & TIMING:\n` +
+                        `----------------------------------------\n` +
+                        `${steps}\n\n` +
+                        `----------------------------------------\n` +
+                        `SAFETY NOTES & INCLUSION PROMPTS:\n` +
+                        `----------------------------------------\n` +
+                        `${safety}\n\n` +
+                        `----------------------------------------\n` +
+                        `LINKED VENUE BOOKINGS & RESERVATIONS:\n` +
+                        `----------------------------------------\n` +
+                        `${bookingsSummary}\n`;
+
+    const blob = new Blob([fileContent], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_session_plan.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function updateQueueUI() {
+    const unsyncedCount = state.pendingPlans.filter(p => !p.synced).length;
+    document.getElementById('queueCount').textContent = unsyncedCount;
+    document.getElementById('savedCount').textContent = state.savedActivityIds.length;
+    document.getElementById('pendingCount').textContent = unsyncedCount;
+
+    const savedContainer = document.getElementById('savedActivitiesList');
+    if (state.savedActivityIds.length === 0) {
+      savedContainer.innerHTML = '<p style="color:#666; font-style:italic;">No activities saved for offline use yet.</p>';
+    } else {
+      const savedItems = sampleActivities.filter(a => state.savedActivityIds.includes(a.id));
+      savedContainer.innerHTML = savedItems.map(a => `
+        <div style="padding: 8px 0; border-bottom: 1px solid var(--line); display:flex; justify-content:space-between; align-items:center;">
+          <div><strong>${a.title}</strong> <span style="font-size:0.85rem; color:#666;">(${a.topic})</span></div>
+          <button class="btn btn-danger btn-small" onclick="toggleSaveActivity('${a.id}')">Remove</button>
+        </div>
+      `).join('');
+    }
+
+    const pendingContainer = document.getElementById('pendingPlansList');
+    if (state.pendingPlans.length === 0) {
+      pendingContainer.innerHTML = '<p style="color:#666; font-style:italic;">No session plans waiting for synchronization.</p>';
+    } else {
+      pendingContainer.innerHTML = state.pendingPlans.map((p, idx) => `
+        <div style="padding: 10px 0; border-bottom: 1px solid var(--line);">
+          <div style="display:flex; justify-content:space-between;">
+            <strong>${p.title}</strong>
+            <span class="badge" style="background:${p.synced ? '#d1fae5' : '#fef3c7'}; color:${p.synced ? '#065f46' : '#b45309'};">
+              ${p.synced ? 'Synced' : 'Pending Sync'}
+            </span>
+          </div>
+          <div style="font-size: 0.85rem; color: #666; margin-top: 4px;">Created: ${p.timestamp}</div>
+        </div>
+      `).join('');
+    }
+
+    const bannerContainer = document.getElementById('syncBannerContainer');
+    if (!state.isOnline) {
+      bannerContainer.innerHTML = `<div class="banner banner-warning">You are currently offline. Changes are saved locally and will sync when connectivity returns.</div>`;
+    } else if (unsyncedCount > 0) {
+      bannerContainer.innerHTML = `<div class="banner banner-success">Connection restored. You have ${unsyncedCount} plan(s) ready to synchronise.</div>`;
+    } else {
+      bannerContainer.innerHTML = '';
+    }
+  }
+
+  function triggerSync() {
+    if (!state.isOnline) {
+      alert('Cannot synchronise while offline. Please connect to the network or toggle simulation mode.');
+      return;
+    }
+    
+    if (state.pendingPlans.length === 0) {
+      alert('No pending plans to synchronise.');
+      return;
+    }
+
+    state.pendingPlans.forEach(p => p.synced = true);
+    localStorage.setItem('stemmate_plans_' + currentUserPin, JSON.stringify(state.pendingPlans));
+    updateQueueUI();
+    renderEditablePlansList();
+    alert('Synchronization complete! All plans uploaded successfully to the STEMMate central database.');
+  }
+</script>
+
+</body>
+</html>
