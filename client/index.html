@@ -10,75 +10,159 @@
     --line: #cfc8b6; --red: #8a1020; --red-bg: #fdeff0; --card: #fff;
     --amber: #b45309; --amber-bg: #fef3c7; --blue: #1d4ed8; --blue-bg: #eff6ff;
   }
-  * { box-sizing: border-box; }
+  * { 
+    box-sizing: border-box; 
+  }
+  
   body { 
-    margin: 0; background: var(--bg); color: var(--ink);
+    margin: 0; 
+    background: var(--bg); 
+    color: var(--ink);
     font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; 
   }
   
+  /* --- AUTH SCREEN --- */
   #auth-screen {
-    max-width: 440px; margin: 60px auto; padding: 24px;
+    max-width: 440px; 
+    margin: 60px auto; 
+    padding: 24px;
   }
   
+  /* --- HEADER --- */
   header {
-    background: var(--green); color: var(--green-ink); padding: 16px;
-    display: flex; justify-content: space-between; align-items: center;
+    background: var(--green); 
+    color: var(--green-ink); 
+    padding: 16px;
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   }
-  header h1 { margin: 0; font-size: 1.25rem; }
-  
+  header h1 { 
+    margin: 0; 
+    font-size: 1.25rem; 
+  }
   .header-actions { 
     display: flex; 
     align-items: center; 
     gap: 12px; 
   }
   
+  /* --- STATUS BADGE --- */
   .status-badge {
-    padding: 4px 10px; border-radius: 12px; font-size: 0.85rem; font-weight: bold;
-    display: flex; align-items: center; gap: 6px;
+    padding: 4px 10px; 
+    border-radius: 12px; 
+    font-size: 0.85rem; 
+    font-weight: bold;
+    display: flex; 
+    align-items: center; 
+    gap: 6px;
   }
-  .status-online { background: #d1fae5; color: #065f46; }
-  .status-offline { background: var(--red-bg); color: var(--red); }
+  .status-online { 
+    background: #d1fae5; 
+    color: #065f46; 
+  }
+  .status-offline { 
+    background: var(--red-bg); 
+    color: var(--red); 
+  }
   
+  /* --- NAVIGATION --- */
   nav {
-    display: flex; background: #eadecd; border-bottom: 2px solid var(--line);
+    display: flex; 
+    background: #eadecd; 
+    border-bottom: 2px solid var(--line);
     overflow-x: auto;
   }
   nav button {
-    background: none; border: none; padding: 12px 16px; font-weight: 600;
-    color: var(--ink); cursor: pointer; flex: 1; white-space: nowrap;
+    background: none; 
+    border: none; 
+    padding: 12px 16px; 
+    font-weight: 600;
+    color: var(--ink); 
+    cursor: pointer; 
+    flex: 1; 
+    white-space: nowrap;
     border-bottom: 3px solid transparent;
   }
   nav button.active {
-    background: var(--card); border-bottom-color: var(--green); color: var(--green);
+    background: var(--card); 
+    border-bottom-color: var(--green); 
+    color: var(--green);
   }
 
-  main { max-width: 680px; margin: 0 auto; padding: 24px 16px 64px; }
-  .card {
-    background: var(--card); border: 1px solid var(--line); border-radius: 8px;
-    padding: 20px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  /* --- MAIN LAYOUT --- */
+  main { 
+    max-width: 680px; 
+    margin: 0 auto; 
+    padding: 24px 16px 64px; 
   }
-  h2 { margin-top: 0; font-size: 1.2rem; color: var(--green); }
+  .card {
+    background: var(--card); 
+    border: 1px solid var(--line); 
+    border-radius: 8px;
+    padding: 20px; 
+    margin-bottom: 16px; 
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  h2 { 
+    margin-top: 0; 
+    font-size: 1.2rem; 
+    color: var(--green); 
+  }
   
-  label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.95rem; }
+  /* --- FORM ELEMENTS --- */
+  label { 
+    display: block; 
+    font-weight: 600; 
+    margin-bottom: 6px; 
+    font-size: 0.95rem; 
+  }
   input, select, textarea {
-    width: 100%; padding: 10px; border: 1px solid var(--line); border-radius: 6px;
-    background: #fff; font-size: 1rem; margin-bottom: 16px; color: var(--ink);
+    width: 100%; 
+    padding: 10px; 
+    border: 1px solid var(--line); 
+    border-radius: 6px;
+    background: #fff; 
+    font-size: 1rem; 
+    margin-bottom: 16px; 
+    color: var(--ink);
   }
   input:focus, select:focus, textarea:focus {
-    outline: 2px solid var(--green); border-color: transparent;
+    outline: 2px solid var(--green); 
+    border-color: transparent;
   }
   
+  /* --- BUTTONS --- */
   .btn {
-    background: var(--green); color: var(--green-ink); border: none; padding: 10px 18px;
-    border-radius: 6px; font-weight: bold; cursor: pointer; display: inline-flex;
-    align-items: center; gap: 8px; font-size: 0.95rem;
+    background: var(--green); 
+    color: var(--green-ink); 
+    border: none; 
+    padding: 10px 18px;
+    border-radius: 6px; 
+    font-weight: bold; 
+    cursor: pointer; 
+    display: inline-flex;
+    align-items: center; 
+    gap: 8px; 
+    font-size: 0.95rem;
   }
-  .btn:hover { opacity: 0.9; }
-  .btn-secondary { background: #e5e7eb; color: var(--ink); border: 1px solid var(--line); }
-  .btn-danger { background: var(--red); color: #fff; }
-  .btn-small { padding: 6px 12px; font-size: 0.85rem; }
-  
+  .btn:hover { 
+    opacity: 0.9; 
+  }
+  .btn-secondary { 
+    background: #e5e7eb; 
+    color: var(--ink); 
+    border: 1px solid var(--line); 
+  }
+  .btn-danger { 
+    background: var(--red); 
+    color: #fff; 
+  }
+  .btn-small { 
+    padding: 6px 12px; 
+    font-size: 0.85rem; 
+  }
   .btn-signout { 
     background: #ffffff !important; 
     color: #8a1020 !important; 
@@ -93,31 +177,94 @@
     background: #fdeff0 !important; 
   }
   
+  /* --- BADGES --- */
   .badge {
-    display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem;
-    font-weight: bold; background: #e5e7eb; margin-right: 6px; margin-bottom: 4px;
+    display: inline-block; 
+    padding: 2px 8px; 
+    border-radius: 4px; 
+    font-size: 0.75rem;
+    font-weight: bold; 
+    background: #e5e7eb; 
+    margin-right: 6px; 
+    margin-bottom: 4px;
   }
-  .badge-topic { background: var(--blue-bg); color: var(--blue); }
+  .badge-topic { 
+    background: var(--blue-bg); 
+    color: var(--blue); 
+  }
   
+  /* --- BANNERS & ALERTS --- */
   .banner {
-    padding: 12px 16px; border-radius: 6px; margin-bottom: 16px; font-size: 0.95rem;
-    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 16px; 
+    border-radius: 6px; 
+    margin-bottom: 16px; 
+    font-size: 0.95rem;
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
   }
-  .banner-warning { background: var(--amber-bg); color: var(--amber); border: 1px solid #fcd34d; }
-  .banner-success { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
-  .error-box { background: var(--red-bg); color: var(--red); border: 1px solid #f87171; padding: 12px; border-radius: 6px; margin-bottom: 16px; font-weight: 500; }
-  .error-text { color: var(--red); font-size: 0.9rem; margin-bottom: 12px; font-weight: 500; }
+  .banner-warning { 
+    background: var(--amber-bg); 
+    color: var(--amber); 
+    border: 1px solid #fcd34d; 
+  }
+  .banner-success { 
+    background: #d1fae5; 
+    color: #065f46; 
+    border: 1px solid #a7f3d0; 
+  }
+  .error-box { 
+    background: var(--red-bg); 
+    color: var(--red); 
+    border: 1px solid #f87171; 
+    padding: 12px; 
+    border-radius: 6px; 
+    margin-bottom: 16px; 
+    font-weight: 500; 
+  }
+  .error-text { 
+    color: var(--red); 
+    font-size: 0.9rem; 
+    margin-bottom: 12px; 
+    font-weight: 500; 
+  }
 
+  /* --- VIEW TOGGLES --- */
   .app-container { display: none; }
   .tab-content { display: none; }
   .tab-content.active { display: block; }
   
-  .filter-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  @media (max-width: 480px) { .filter-row { grid-template-columns: 1fr; } }
+  /* --- GRID LAYOUT --- */
+  .filter-row { 
+    display: grid; 
+    grid-template-columns: 1fr 1fr; 
+    gap: 12px; 
+  }
+  @media (max-width: 480px) { 
+    .filter-row { 
+      grid-template-columns: 1fr; 
+    } 
+  }
+
+  /* =========================================
+     ACCESSIBILITY FIX FOR T18 (44x44 TARGETS)
+     ========================================= */
+  button, input, select, a[href], [role="button"] {
+    min-height: 44px !important;
+    min-width: 44px !important;
+    box-sizing: border-box !important;
+  }
+  .btn-small, nav button, .btn-signout {
+    min-height: 44px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
 </style>
 </head>
 <body>
 
+  <!-- ============ SIGN-IN SCREEN ============ -->
   <div id="auth-screen">
     <div style="font-size: 1.5rem; font-weight: bold; color: var(--green); margin-bottom: 4px;">STEMMate</div>
     <div style="color: #4b5563; margin-bottom: 16px;">Secure access to your saved work.</div>
@@ -138,12 +285,13 @@
     </div>
   </div>
 
+  <!-- ============ MAIN APPLICATION ============ -->
   <div id="mainApp" class="app-container">
     <header>
       <h1>STEMMate Namibia</h1>
       <div class="header-actions">
         <div id="connectionStatus" class="status-badge status-online" aria-live="polite">
-          <span aria-hidden="true">●</span> <span id="statusText">Online (Synced)</span>
+          <span id="statusText">Online (Synced)</span>
         </div>
         <button class="btn-signout" onclick="signOut()">Sign Out</button>
       </div>
@@ -162,6 +310,7 @@
         </button>
       </div>
 
+      <!-- ============ TAB 1: CATALOG ============ -->
       <section id="tab-catalog" class="tab-content active">
         <h2>Browse STEM Activities</h2>
         <div id="userWelcomeBanner"></div>
@@ -197,10 +346,10 @@
           </div>
         </div>
 
-        <div id="activitiesContainer">
-        </div>
+        <div id="activitiesContainer"></div>
       </section>
 
+      <!-- ============ TAB 2: PLANNER & VENUES ============ -->
       <section id="tab-planner" class="tab-content">
         <h2>Create &amp; Manage Session Plan</h2>
         <div class="card">
@@ -242,7 +391,7 @@
 
             <div style="display: flex; gap: 12px; flex-wrap: wrap;">
               <button type="submit" class="btn" id="savePlanBtn">Save Plan (Queue for Sync)</button>
-              <button type="button" class="btn btn-secondary" onclick="downloadSessionPlan()">⬇ Download Session Plan + Venue Booking (.txt)</button>
+              <button type="button" class="btn btn-secondary" onclick="downloadSessionPlan()">Download Session Plan + Venue Booking (.txt)</button>
               <button type="button" class="btn btn-secondary" id="cancelEditBtn" onclick="resetPlannerForm()" style="display:none;">Cancel Edit</button>
             </div>
           </form>
@@ -298,7 +447,7 @@
         </div>
 
         <div class="card">
-          <h3 style="margin-top:0; color: var(--green);">View &amp; Edit Previous Saved Plans (Backup Backup)</h3>
+          <h3 style="margin-top:0; color: var(--green);">View &amp; Edit Previous Saved Plans</h3>
           <p style="font-size: 0.9rem; color: #4b5563; margin-bottom: 16px;">
             Review previously saved session plans, load them into the form above to edit, or export them as backup files.
           </p>
@@ -308,6 +457,7 @@
         </div>
       </section>
 
+      <!-- ============ TAB 3: QUEUE ============ -->
       <section id="tab-queue" class="tab-content">
         <h2>Offline Storage &amp; Sync Queue</h2>
         <div id="syncBannerContainer"></div>
@@ -333,6 +483,10 @@
   </div>
 
 <script>
+  // ==========================================
+  // STEMMATE NAMIBIA - CORE LOGIC
+  // ==========================================
+
   const sampleActivities = [
     {
       id: 'act-1',
@@ -425,12 +579,13 @@
     isNewUser: false
   };
 
+  // --- AUTHENTICATION ---
   function verifyPin() {
     const inputPin = document.getElementById('userPin').value;
     const storedPin = localStorage.getItem('stemmate_user_pin');
-
     const errEl = document.getElementById('authErrorMsg');
     const successEl = document.getElementById('authSuccessMsg');
+
     errEl.style.display = 'none';
     successEl.style.display = 'none';
 
@@ -466,6 +621,7 @@
     const inputPin = document.getElementById('userPin').value;
     const errEl = document.getElementById('authErrorMsg');
     const successEl = document.getElementById('authSuccessMsg');
+
     errEl.style.display = 'none';
     successEl.style.display = 'none';
 
@@ -506,12 +662,13 @@
   function renderUserWelcomeBanner() {
     const bannerContainer = document.getElementById('userWelcomeBanner');
     if (state.isNewUser) {
-      bannerContainer.innerHTML = `<div class="banner banner-success">👋 Welcome new user! Your private workspace has been successfully initialized. Your saved activities and plans remain completely private to your PIN.</div>`;
+      bannerContainer.innerHTML = `<div class="banner banner-success">Welcome new user! Your private workspace has been successfully initialized.</div>`;
     } else {
-      bannerContainer.innerHTML = `<div class="banner banner-success" style="background:#eff6ff; color:#1d4ed8; border-color:#bfdbfe;">🔓 Welcome back! Your previous personal workspace and drafts have been restored securely.</div>`;
+      bannerContainer.innerHTML = `<div class="banner banner-success" style="background:#eff6ff; color:#1d4ed8; border-color:#bfdbfe;">Welcome back! Your previous personal workspace and drafts have been restored securely.</div>`;
     }
   }
 
+  // --- NAVIGATION ---
   function switchTab(tabId) {
     document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('nav button').forEach(el => el.classList.remove('active'));
@@ -538,6 +695,7 @@
     updateQueueUI();
   }
 
+  // --- ACTIVITY CATALOG ---
   function filterActivities() {
     const topic = document.getElementById('filterTopic').value;
     const level = document.getElementById('filterLevel').value;
@@ -562,11 +720,11 @@
         <div class="card">
           <span class="badge badge-topic">${act.topic}</span>
           <span class="badge">${act.level}</span>
-          <span class="badge">⏱ ${act.duration}</span>
+          <span class="badge">Duration: ${act.duration}</span>
           <h3 style="margin: 10px 0 6px;">${act.title}</h3>
           <p style="margin: 0 0 12px; font-size: 0.95rem;"><strong>Materials:</strong> ${act.materials}</p>
           <button class="btn ${isSaved ? 'btn-secondary' : ''}" onclick="toggleSaveActivity('${act.id}')">
-            ${isSaved ? '✓ Saved Offline' : 'Save for Offline Use'}
+            ${isSaved ? 'Saved Offline' : 'Save for Offline Use'}
           </button>
         </div>
       `;
@@ -584,6 +742,7 @@
     updateQueueUI();
   }
 
+  // --- VENUE BOOKING ---
   function bookVenue(e) {
     e.preventDefault();
     const venueName = document.getElementById('bookingVenueName').value;
@@ -608,25 +767,20 @@
     if (conflict) {
       feedbackEl.innerHTML = `
         <div class="error-box">
-          <strong>❌ Venue Already Booked!</strong><br>
-          ${venueName} is already reserved on ${date} from <strong>${conflict.startTime}</strong> to <strong>${conflict.endTime}</strong> (Duration: ${conflict.startTime} – ${conflict.endTime}, Booked by: ${conflict.facilitator}).
+          <strong>Venue Already Booked!</strong><br>
+          ${venueName} is already reserved on ${date} from <strong>${conflict.startTime}</strong> to <strong>${conflict.endTime}</strong>.
         </div>`;
       return;
     }
 
     const newBooking = {
       id: 'booking-' + Date.now(),
-      venueName,
-      date,
-      startTime,
-      endTime,
-      facilitator
+      venueName, date, startTime, endTime, facilitator
     };
 
     state.venueBookings.push(newBooking);
     localStorage.setItem('stemmate_bookings', JSON.stringify(state.venueBookings));
-
-    feedbackEl.innerHTML = `<div class="banner banner-success">✅ Venue successfully booked and confirmed for ${date} (${startTime} - ${endTime})!</div>`;
+    feedbackEl.innerHTML = `<div class="banner banner-success">Venue successfully booked and confirmed for ${date} (${startTime} - ${endTime})!</div>`;
     document.getElementById('venueBookingForm').reset();
     renderBookingsList();
   }
@@ -643,7 +797,7 @@
         <div>
           <strong>${b.venueName}</strong>
           <div style="font-size: 0.85rem; color: #555; margin-top: 2px;">
-            📅 Date: ${b.date} | ⏰ Time: ${b.startTime} – ${b.endTime} | 👤 Facilitator: ${b.facilitator}
+            Date: ${b.date} | Time: ${b.startTime} – ${b.endTime}
           </div>
         </div>
         <button class="btn btn-danger btn-small" onclick="cancelBooking('${b.id}')">Cancel</button>
@@ -660,6 +814,7 @@
     }
   }
 
+  // --- SESSION PLAN MANAGEMENT ---
   function saveSessionPlan(e) {
     e.preventDefault();
     const editingId = document.getElementById('editingPlanId').value;
@@ -707,7 +862,6 @@
 
     document.getElementById('savePlanBtn').textContent = 'Update Session Plan';
     document.getElementById('cancelEditBtn').style.display = 'inline-block';
-    
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -731,7 +885,7 @@
           <div>
             <strong>${p.title}</strong>
             <div style="font-size: 0.85rem; color: #555; margin-top: 2px;">
-              Audience: ${p.target} | Duration: ${p.duration}m | Saved: ${p.timestamp}
+              Audience: ${p.target} | Duration: ${p.duration}m
             </div>
           </div>
           <span class="badge" style="background:${p.synced ? '#d1fae5' : '#fef3c7'}; color:${p.synced ? '#065f46' : '#b45309'};">
@@ -739,8 +893,8 @@
           </span>
         </div>
         <div style="margin-top: 10px; display:flex; gap: 8px;">
-          <button class="btn btn-secondary btn-small" onclick="editSessionPlan('${p.id}')">✏ Edit Plan</button>
-          <button class="btn btn-secondary btn-small" onclick="downloadSpecificPlan('${p.id}')">⬇ Export Backup (.txt)</button>
+          <button class="btn btn-secondary btn-small" onclick="editSessionPlan('${p.id}')">Edit Plan</button>
+          <button class="btn btn-secondary btn-small" onclick="downloadSpecificPlan('${p.id}')">Export Backup (.txt)</button>
           <button class="btn btn-danger btn-small" onclick="deletePlan('${p.id}')">Delete</button>
         </div>
       </div>
@@ -757,10 +911,9 @@
     }
   }
 
+  // --- EXPORT AND SYNC ---
   function getBookingsTextSummary() {
-    if (state.venueBookings.length === 0) {
-      return 'No venue reservations currently recorded.';
-    }
+    if (state.venueBookings.length === 0) return 'No venue reservations currently recorded.';
     return state.venueBookings.map(b => 
       `Venue: ${b.venueName}\n` +
       `Date: ${b.date}\n` +
@@ -775,7 +928,6 @@
     if (!p) return;
 
     const bookingsSummary = getBookingsTextSummary();
-
     const fileContent = `========================================\n` +
                         `STEMMATE NAMIBIA - SESSION PLAN BACKUP\n` +
                         `========================================\n` +
@@ -815,9 +967,9 @@
     const title = document.getElementById('sessionTitle').value || 'Untitled_Session_Plan';
     const target = document.getElementById('sessionTarget').value;
     const duration = document.getElementById('sessionDuration').value;
-    const materials = document.getElementById('sessionMaterials').value || document.getElementById('sessionMaterials').placeholder;
-    const steps = document.getElementById('sessionSteps').value || document.getElementById('sessionSteps').placeholder;
-    const safety = document.getElementById('sessionSafety').value || document.getElementById('sessionSafety').placeholder;
+    const materials = document.getElementById('sessionMaterials').value || 'None specified.';
+    const steps = document.getElementById('sessionSteps').value || 'None specified.';
+    const safety = document.getElementById('sessionSafety').value || 'None specified.';
     
     const bookingsSummary = getBookingsTextSummary();
 
@@ -879,7 +1031,7 @@
     if (state.pendingPlans.length === 0) {
       pendingContainer.innerHTML = '<p style="color:#666; font-style:italic;">No session plans waiting for synchronization.</p>';
     } else {
-      pendingContainer.innerHTML = state.pendingPlans.map((p, idx) => `
+      pendingContainer.innerHTML = state.pendingPlans.map(p => `
         <div style="padding: 10px 0; border-bottom: 1px solid var(--line);">
           <div style="display:flex; justify-content:space-between;">
             <strong>${p.title}</strong>
@@ -907,7 +1059,6 @@
       alert('Cannot synchronise while offline. Please connect to the network or toggle simulation mode.');
       return;
     }
-    
     if (state.pendingPlans.length === 0) {
       alert('No pending plans to synchronise.');
       return;
@@ -920,6 +1071,5 @@
     alert('Synchronization complete! All plans uploaded successfully to the STEMMate central database.');
   }
 </script>
-
 </body>
 </html>
